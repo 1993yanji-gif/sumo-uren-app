@@ -19,9 +19,9 @@ html {
 body {
   font-family: 'Inter', sans-serif;
   background:
-    radial-gradient(circle at top, rgba(201, 162, 39, 0.14), transparent 32%),
-    linear-gradient(180deg, #050505 0%, #0a0a0a 30%, #120f09 100%);
-  color: #f5f0e6;
+    radial-gradient(circle at top, rgba(166, 121, 32, 0.18), transparent 32%),
+    linear-gradient(180deg, #030303 0%, #0a0a0a 28%, #171109 100%);
+  color: #f6f0e4;
   overflow-x: hidden;
 }
 
@@ -108,9 +108,9 @@ body {
 }
 
 .sumo-card {
-  border: 1px solid rgba(201, 162, 39, 0.18);
-  background: linear-gradient(180deg, rgba(19, 19, 19, 0.9), rgba(10, 10, 10, 0.94));
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(166, 121, 32, 0.28);
+  background: linear-gradient(180deg, rgba(22, 18, 14, 0.94), rgba(8, 8, 8, 0.97));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
 }
 
 .sumo-muted {
@@ -118,7 +118,7 @@ body {
 }
 
 .sumo-label {
-  color: #d4af37;
+  color: #c08a2a;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-size: 0.72rem;
@@ -127,5 +127,5 @@ body {
 .sumo-divider {
   width: 72px;
   height: 1px;
-  background: linear-gradient(90deg, #c9a227, rgba(201, 162, 39, 0));
+  background: linear-gradient(90deg, #a67920, rgba(166, 121, 32, 0));
 }
