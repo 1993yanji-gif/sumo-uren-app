@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { defaultEmployees, type EmployeeOption } from '@/lib/hours-data'
 
 type TimeEntry = {
@@ -18,6 +18,9 @@ const sampleRows: TimeEntry[] = [
   { name: 'Bo', date: '2026-04-30', start: '12:00', end: '18:00', breakMinutes: 30, hours: 5.5 },
 ]
 
+const DEFAULT_ADMIN_PIN = '2580'
+const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
+
 function createEmployeeId(name: string) {
   return name
     .toLowerCase()
@@ -30,8 +33,33 @@ export default function AdminPage() {
   const [employees, setEmployees] = useState<EmployeeOption[]>(defaultEmployees)
   const [newEmployeeName, setNewEmployeeName] = useState('')
   const [message, setMessage] = useState('')
+  const [pinInput, setPinInput] = useState('')
+  const [pinError, setPinError] = useState('')
+  const [isUnlocked, setIsUnlocked] = useState(false)
 
+  const adminPin = process.env.NEXT_PUBLIC_ADMIN_PIN || DEFAULT_ADMIN_PIN
   const totalHours = useMemo(() => sampleRows.reduce((sum, row) => sum + row.hours, 0), [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const savedState = window.sessionStorage.getItem(ADMIN_PIN_STORAGE_KEY)
+    if (savedState === 'ok') {
+      setIsUnlocked(true)
+    }
+  }, [])
+
+  const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (pinInput === adminPin) {
+      setIsUnlocked(true)
+      setPinError('')
+      window.sessionStorage.setItem(ADMIN_PIN_STORAGE_KEY, 'ok')
+      return
+    }
+
+    setPinError('Onjuiste pincode.')
+  }
 
   const handleAddEmployee = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -59,6 +87,49 @@ export default function AdminPage() {
     const employee = employees.find((item) => item.id === employeeId)
     setEmployees((current) => current.filter((item) => item.id !== employeeId))
     setMessage(employee ? `${employee.name} verwijderd uit de medewerkerslijst.` : 'Medewerker verwijderd.')
+  }
+
+  if (!isUnlocked) {
+    return (
+      <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
+        <div className="mx-auto flex min-h-[80vh] max-w-lg items-center">
+          <div className="w-full rounded-3xl border border-amber-500/20 bg-stone-900/80 p-8 shadow-2xl shadow-black/30 backdrop-blur">
+            <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Admin beveiliging</p>
+            <h1 className="font-display text-4xl text-stone-50">Voer je pincode in</h1>
+            <p className="mt-3 text-sm text-stone-300">
+              De admin pagina is afgeschermd. Vul je pincode in om het urenoverzicht te openen.
+            </p>
+
+            <form className="mt-6 space-y-4" onSubmit={handleUnlock}>
+              <input
+                type="password"
+                inputMode="numeric"
+                value={pinInput}
+                onChange={(event) => setPinInput(event.target.value)}
+                placeholder="Pincode"
+                className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-4 text-lg tracking-[0.3em] text-stone-100 outline-none transition focus:border-amber-400"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-2xl bg-amber-400 px-5 py-4 text-base font-semibold text-stone-950 transition hover:bg-amber-300"
+              >
+                Open admin
+              </button>
+            </form>
+
+            {pinError ? (
+              <div className="mt-4 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {pinError}
+              </div>
+            ) : null}
+
+            <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
+              Tijdelijke standaard pincode: <strong>{DEFAULT_ADMIN_PIN}</strong>. Die kan ik daarna voor je aanpassen.
+            </div>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   return (

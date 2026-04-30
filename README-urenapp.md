@@ -16,6 +16,7 @@ npm run dev
 - Frontend prototype klaar
 - Automatische urenberekening werkt client-side
 - Admin kan medewerkers toevoegen/verwijderen in demo-state
+- Admin pagina vraagt eerst om een pincode
 - Opslaan is nu nog demo/local-only
 
 ## Volgende Cloudflare stappen
@@ -23,6 +24,10 @@ npm run dev
 2. D1 database aanmaken met tabel `time_entries`
 3. API routes of Worker endpoints toevoegen voor opslaan/ophalen
 4. Admin pagina beveiligen met Cloudflare Access of eenvoudige login
+
+## Admin pincode
+- Standaard pincode: `2580`
+- Later aanpasbaar via `NEXT_PUBLIC_ADMIN_PIN`
 
 ## Voorstel database
 ```sql
