@@ -20,15 +20,37 @@ const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
 export default function AdminPage() {
   const [employees, setEmployees] = useState<EmployeeRecord[]>([])
   const [entries, setEntries] = useState<TimeEntry[]>([])
-  const [newEmployeeName, setNewEmployeeName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [pin, setPin] = useState('')
   const [message, setMessage] = useState('')
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState('')
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSavingEmployee, setIsSavingEmployee] = useState(false)
 
   const adminPin = process.env.NEXT_PUBLIC_ADMIN_PIN || DEFAULT_ADMIN_PIN
   const totalHours = useMemo(() => entries.reduce((sum, row) => sum + row.totalHours, 0), [entries])
+
+  const loadAdminData = async () => {
+    try {
+      const [employeesResponse, entriesResponse] = await Promise.all([
+        fetch('/api/employees', { cache: 'no-store' }),
+        fetch('/api/time-entries', { cache: 'no-store' }),
+      ])
+
+      const employeesData = await employeesResponse.json()
+      const entriesData = await entriesResponse.json()
+
+      if (employeesResponse.ok) setEmployees(employeesData.employees || [])
+      if (entriesResponse.ok) setEntries(entriesData.entries || [])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -40,26 +62,6 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!isUnlocked) return
-
-    const loadAdminData = async () => {
-      try {
-        const [employeesResponse, entriesResponse] = await Promise.all([
-          fetch('/api/employees', { cache: 'no-store' }),
-          fetch('/api/time-entries', { cache: 'no-store' }),
-        ])
-
-        const employeesData = await employeesResponse.json()
-        const entriesData = await entriesResponse.json()
-
-        if (employeesResponse.ok) setEmployees(employeesData.employees || [])
-        if (entriesResponse.ok) setEntries(entriesData.entries || [])
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     loadAdminData()
   }, [isUnlocked])
 
@@ -76,10 +78,49 @@ export default function AdminPage() {
     setPinError('Onjuiste pincode.')
   }
 
-  const handleAddEmployee = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleAddEmployee = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setMessage('Nieuwe medewerkers voeg je nu toe via de homepage.')
-    setNewEmployeeName('')
+    setMessage('')
+
+    const cleanFirstName = firstName.trim()
+    const cleanLastName = lastName.trim()
+
+    if (!cleanFirstName || !cleanLastName) {
+      setMessage('Vul voornaam en achternaam in.')
+      return
+    }
+
+    if (!/^\d{4}$/.test(pin)) {
+      setMessage('Pincode moet uit 4 cijfers bestaan.')
+      return
+    }
+
+    setIsSavingEmployee(true)
+
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName: cleanFirstName, lastName: cleanLastName, pin }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        setMessage(data.error || 'Toevoegen mislukt.')
+        return
+      }
+
+      setFirstName('')
+      setLastName('')
+      setPin('')
+      setMessage(`${data.employee.name} toegevoegd.`)
+      await loadAdminData()
+    } catch (error) {
+      console.error(error)
+      setMessage('Er ging iets mis bij toevoegen.')
+    } finally {
+      setIsSavingEmployee(false)
+    }
   }
 
   const handleRemoveEmployee = (employeeId: string) => {
@@ -186,23 +227,42 @@ export default function AdminPage() {
             <div>
               <h2 className="font-display text-3xl text-stone-50">Medewerkers beheren</h2>
               <p className="mt-2 text-sm text-stone-300">
-                Nieuwe medewerkers komen nu uit de database via de homepage registratie.
+                Voeg hier ook direct een nieuwe medewerker toe.
               </p>
             </div>
 
-            <form className="mt-5 flex flex-col gap-3 sm:flex-row" onSubmit={handleAddEmployee}>
+            <form className="mt-5 space-y-3" onSubmit={handleAddEmployee}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
+                  placeholder="Voornaam"
+                  className="rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                />
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                  placeholder="Achternaam"
+                  className="rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                />
+              </div>
               <input
-                type="text"
-                value={newEmployeeName}
-                onChange={(event) => setNewEmployeeName(event.target.value)}
-                placeholder="Naam medewerker"
-                className="flex-1 rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={pin}
+                onChange={(event) => setPin(event.target.value)}
+                placeholder="Pincode (4 cijfers)"
+                className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
               />
               <button
                 type="submit"
-                className="rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
+                disabled={isSavingEmployee}
+                className="w-full rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300 disabled:opacity-60"
               >
-                Info
+                {isSavingEmployee ? 'Bezig met toevoegen...' : 'Medewerker toevoegen'}
               </button>
             </form>
 
