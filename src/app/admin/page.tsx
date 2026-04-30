@@ -91,12 +91,12 @@ export default function AdminPage() {
 
   if (!isUnlocked) {
     return (
-      <main className="min-h-screen px-4 py-10 text-rose-950">
+      <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
         <div className="mx-auto flex min-h-[80vh] max-w-lg items-center">
-          <div className="w-full rounded-[2rem] border border-rose-200/80 bg-white/85 p-8 shadow-[0_24px_80px_rgba(244,114,182,0.16)] backdrop-blur">
-            <p className="mb-2 text-sm uppercase tracking-[0.3em] text-rose-400">Admin beveiliging</p>
-            <h1 className="font-display text-4xl text-rose-950">Voer je pincode in</h1>
-            <p className="mt-3 text-sm text-rose-900/70">
+          <div className="w-full rounded-3xl border border-amber-500/20 bg-stone-900/80 p-8 shadow-2xl shadow-black/30 backdrop-blur">
+            <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Admin beveiliging</p>
+            <h1 className="font-display text-4xl text-stone-50">Voer je pincode in</h1>
+            <p className="mt-3 text-sm text-stone-300">
               De admin pagina is afgeschermd. Vul je pincode in om het urenoverzicht te openen.
             </p>
 
@@ -107,23 +107,23 @@ export default function AdminPage() {
                 value={pinInput}
                 onChange={(event) => setPinInput(event.target.value)}
                 placeholder="Pincode"
-                className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-4 text-lg tracking-[0.3em] text-rose-950 outline-none transition focus:border-rose-400"
+                className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-4 text-lg tracking-[0.3em] text-stone-100 outline-none transition focus:border-amber-400"
               />
               <button
                 type="submit"
-                className="w-full rounded-2xl bg-gradient-to-r from-rose-400 to-pink-400 px-5 py-4 text-base font-semibold text-white transition hover:opacity-95"
+                className="w-full rounded-2xl bg-amber-400 px-5 py-4 text-base font-semibold text-stone-950 transition hover:bg-amber-300"
               >
                 Open admin
               </button>
             </form>
 
             {pinError ? (
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div className="mt-4 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
                 {pinError}
               </div>
             ) : null}
 
-            <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-700">
+            <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
               Tijdelijke standaard pincode: <strong>{DEFAULT_ADMIN_PIN}</strong>. Die kan ik daarna voor je aanpassen.
             </div>
           </div>
@@ -133,26 +133,26 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-10 text-rose-950">
-      <div className="mx-auto max-w-6xl rounded-[2rem] border border-rose-200/80 bg-white/85 p-6 shadow-[0_24px_80px_rgba(244,114,182,0.14)] backdrop-blur md:p-8">
+    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
+      <div className="mx-auto max-w-6xl rounded-3xl border border-amber-500/20 bg-stone-900/80 p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-2 text-sm uppercase tracking-[0.3em] text-rose-400">Admin</p>
-            <h1 className="font-display text-4xl text-rose-950 md:text-5xl">Uren overzicht</h1>
-            <p className="mt-3 text-sm text-rose-900/70 md:text-base">
+            <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Admin</p>
+            <h1 className="font-display text-4xl text-stone-50 md:text-5xl">Uren overzicht</h1>
+            <p className="mt-3 text-sm text-stone-300 md:text-base">
               Alleen voor jou zichtbaar. Hier zie je alle ingevoerde uren en beheer je ook de medewerkerslijst.
             </p>
           </div>
-          <div className="rounded-2xl border border-rose-200 bg-gradient-to-r from-rose-50 to-pink-50 px-5 py-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-rose-400">Totaal demo uren</p>
-            <p className="mt-1 text-3xl font-semibold text-rose-950">{totalHours.toFixed(2)} uur</p>
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-amber-300">Totaal demo uren</p>
+            <p className="mt-1 text-3xl font-semibold text-stone-50">{totalHours.toFixed(2)} uur</p>
           </div>
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.25fr,0.95fr]">
-          <section className="overflow-hidden rounded-3xl border border-rose-100 bg-white/70">
-            <table className="min-w-full divide-y divide-rose-100 text-left text-sm">
-              <thead className="bg-rose-50/80 text-rose-500">
+          <section className="overflow-hidden rounded-3xl border border-stone-800">
+            <table className="min-w-full divide-y divide-stone-800 text-left text-sm">
+              <thead className="bg-stone-950/80 text-stone-300">
                 <tr>
                   <th className="px-4 py-3 font-medium">Naam</th>
                   <th className="px-4 py-3 font-medium">Datum</th>
@@ -162,7 +162,7 @@ export default function AdminPage() {
                   <th className="px-4 py-3 font-medium">Totaal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-rose-100 bg-white/60 text-rose-950">
+              <tbody className="divide-y divide-stone-800 bg-stone-900/60 text-stone-100">
                 {sampleRows.map((row) => (
                   <tr key={`${row.name}-${row.date}-${row.start}`}>
                     <td className="px-4 py-3">{row.name}</td>
@@ -170,17 +170,17 @@ export default function AdminPage() {
                     <td className="px-4 py-3">{row.start}</td>
                     <td className="px-4 py-3">{row.end}</td>
                     <td className="px-4 py-3">{row.breakMinutes} min</td>
-                    <td className="px-4 py-3 font-medium text-rose-500">{row.hours.toFixed(2)} uur</td>
+                    <td className="px-4 py-3 font-medium text-amber-300">{row.hours.toFixed(2)} uur</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </section>
 
-          <aside className="rounded-3xl border border-rose-100 bg-white/70 p-5">
+          <aside className="rounded-3xl border border-stone-800 bg-stone-950/60 p-5">
             <div>
-              <h2 className="font-display text-3xl text-rose-950">Medewerkers beheren</h2>
-              <p className="mt-2 text-sm text-rose-900/70">
+              <h2 className="font-display text-3xl text-stone-50">Medewerkers beheren</h2>
+              <p className="mt-2 text-sm text-stone-300">
                 Voeg medewerkers toe of verwijder ze. In de definitieve versie wordt dit opgeslagen in de database.
               </p>
             </div>
@@ -191,18 +191,18 @@ export default function AdminPage() {
                 value={newEmployeeName}
                 onChange={(event) => setNewEmployeeName(event.target.value)}
                 placeholder="Naam medewerker"
-                className="flex-1 rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 outline-none transition focus:border-rose-400"
+                className="flex-1 rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
               />
               <button
                 type="submit"
-                className="rounded-2xl bg-gradient-to-r from-rose-400 to-pink-400 px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+                className="rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
               >
                 Toevoegen
               </button>
             </form>
 
             {message ? (
-              <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div className="mt-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
                 {message}
               </div>
             ) : null}
@@ -211,16 +211,16 @@ export default function AdminPage() {
               {employees.map((employee) => (
                 <div
                   key={employee.id}
-                  className="flex items-center justify-between rounded-2xl border border-rose-100 bg-rose-50/70 px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border border-stone-800 bg-stone-900/80 px-4 py-3"
                 >
                   <div>
-                    <p className="font-medium text-rose-950">{employee.name}</p>
-                    <p className="text-xs uppercase tracking-[0.18em] text-rose-400">ID: {employee.id}</p>
+                    <p className="font-medium text-stone-100">{employee.name}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-400">ID: {employee.id}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveEmployee(employee.id)}
-                    className="rounded-xl border border-rose-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-rose-500 transition hover:bg-rose-100"
+                    className="rounded-xl border border-red-500/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-red-300 transition hover:bg-red-500/10"
                   >
                     Verwijderen
                   </button>
@@ -230,7 +230,7 @@ export default function AdminPage() {
           </aside>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-700">
+        <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
           Nu is dit nog demo-state in de browser. Volgende stap: medewerkers en uren echt opslaan in Cloudflare D1.
         </div>
       </div>
