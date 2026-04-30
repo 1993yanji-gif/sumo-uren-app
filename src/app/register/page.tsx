@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
-import { apiUrl } from '@/lib/api-base'
+import { createEmployee } from '@/lib/supabase-hours'
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('')
@@ -39,30 +39,15 @@ export default function RegisterPage() {
     setRegisterMessage('')
 
     try {
-      const response = await fetch(apiUrl('/api/employees'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: cleanFirstName,
-          lastName: cleanLastName,
-          pin: newPin,
-        }),
-      })
-
-      const data = await response.json()
-      if (!response.ok) {
-        setRegisterError(data.error || 'Aanmaken mislukt.')
-        return
-      }
-
+      const employee = await createEmployee(cleanFirstName, cleanLastName, newPin)
       setFirstName('')
       setLastName('')
       setNewPin('')
       setConfirmPin('')
-      setRegisterMessage(`${data.employee.name} is opgeslagen. Je kunt nu terug naar de homepage om in te loggen.`)
+      setRegisterMessage(`${employee.name} is opgeslagen. Je kunt nu terug naar de homepage om in te loggen.`)
     } catch (error) {
       console.error(error)
-      setRegisterError('Er ging iets mis bij het aanmaken.')
+      setRegisterError(error instanceof Error ? error.message : 'Er ging iets mis bij het aanmaken.')
     } finally {
       setIsRegistering(false)
     }

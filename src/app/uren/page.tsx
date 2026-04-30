@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { defaultEmployees } from '@/lib/hours-data'
-import { apiUrl } from '@/lib/api-base'
+import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
+import { createTimeEntry, getEmployees } from '@/lib/supabase-hours'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -20,6 +20,7 @@ function calculateHours(start: string, end: string, breakMinutes: number) {
 }
 
 export default function UrenPage() {
+  const [employees, setEmployees] = useState<EmployeeRecord[]>(defaultEmployees)
   const [employeeId, setEmployeeId] = useState('')
   const [date, setDate] = useState(today)
   const [startTime, setStartTime] = useState('')
@@ -30,6 +31,19 @@ export default function UrenPage() {
   const [saveMessage, setSaveMessage] = useState('')
   const [saveError, setSaveError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const data = await getEmployees()
+        if (data.length) setEmployees(data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    loadEmployees()
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -57,30 +71,20 @@ export default function UrenPage() {
     setIsSaving(true)
 
     try {
-      const response = await fetch(apiUrl('/api/time-entries'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          employeeId,
-          date,
-          startTime,
-          endTime,
-          breakMinutes: Number(breakMinutes) || 0,
-          note,
-        }),
+      await createTimeEntry({
+        employeeId,
+        date,
+        startTime,
+        endTime,
+        breakMinutes: Number(breakMinutes) || 0,
+        note,
       })
-
-      const data = await response.json()
-      if (!response.ok) {
-        setSaveError(data.error || 'Opslaan mislukt.')
-        return
-      }
 
       setSaved(true)
       setSaveMessage('Uren zijn opgeslagen.')
     } catch (error) {
       console.error(error)
-      setSaveError('Er ging iets mis bij het opslaan.')
+      setSaveError(error instanceof Error ? error.message : 'Er ging iets mis bij het opslaan.')
     } finally {
       setIsSaving(false)
     }
@@ -107,7 +111,7 @@ export default function UrenPage() {
               className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
             >
               <option value="">Kies je naam</option>
-              {defaultEmployees.map((employee) => (
+              {employees.map((employee) => (
                 <option key={employee.id} value={employee.id}>
                   {employee.name}
                 </option>
@@ -202,7 +206,7 @@ export default function UrenPage() {
 
         {saved ? (
           <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
-            De uren zijn nu opgeslagen in de database.
+            De uren zijn nu opgeslagen in Supabase.
           </div>
         ) : null}
       </div>

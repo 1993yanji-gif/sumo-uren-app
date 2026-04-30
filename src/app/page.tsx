@@ -4,14 +4,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
-import { apiUrl } from '@/lib/api-base'
-
-type EmployeeApiRecord = {
-  id: string
-  firstName: string
-  lastName: string
-  name: string
-}
+import { getEmployees, loginEmployee } from '@/lib/supabase-hours'
 
 export default function Home() {
   const router = useRouter()
@@ -24,12 +17,8 @@ export default function Home() {
   useEffect(() => {
     const loadEmployees = async () => {
       try {
-        const response = await fetch(apiUrl('/api/employees'), { cache: 'no-store' })
-        if (!response.ok) throw new Error('Kon medewerkers niet laden')
-        const data = (await response.json()) as { employees: EmployeeApiRecord[] }
-        if (data.employees?.length) {
-          setEmployees(data.employees)
-        }
+        const data = await getEmployees()
+        if (data.length) setEmployees(data)
       } catch (error) {
         console.error(error)
       } finally {
@@ -54,23 +43,12 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch(apiUrl('/api/login'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ employeeId: selectedEmployee, pin: employeePin }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        setLoginError(data.error || 'Inloggen mislukt.')
-        return
-      }
-
+      await loginEmployee(selectedEmployee, employeePin)
       setLoginError('')
       router.push(`/uren?employee=${selectedEmployee}`)
     } catch (error) {
       console.error(error)
-      setLoginError('Er ging iets mis bij het inloggen.')
+      setLoginError(error instanceof Error ? error.message : 'Er ging iets mis bij het inloggen.')
     }
   }
 

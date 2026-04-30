@@ -2,18 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { type EmployeeRecord } from '@/lib/hours-data'
-import { apiUrl } from '@/lib/api-base'
-
-type TimeEntry = {
-  id: number
-  employeeName: string
-  workDate: string
-  startTime: string
-  endTime: string
-  breakMinutes: number
-  totalHours: number
-  note?: string
-}
+import { createEmployee, getEmployees, getTimeEntries, type TimeEntry } from '@/lib/supabase-hours'
 
 const DEFAULT_ADMIN_PIN = '2580'
 const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
@@ -36,18 +25,12 @@ export default function AdminPage() {
 
   const loadAdminData = async () => {
     try {
-      const [employeesResponse, entriesResponse] = await Promise.all([
-        fetch(apiUrl('/api/employees'), { cache: 'no-store' }),
-        fetch(apiUrl('/api/time-entries'), { cache: 'no-store' }),
-      ])
-
-      const employeesData = await employeesResponse.json()
-      const entriesData = await entriesResponse.json()
-
-      if (employeesResponse.ok) setEmployees(employeesData.employees || [])
-      if (entriesResponse.ok) setEntries(entriesData.entries || [])
+      const [employeesData, entriesData] = await Promise.all([getEmployees(), getTimeEntries()])
+      setEmployees(employeesData)
+      setEntries(entriesData)
     } catch (error) {
       console.error(error)
+      setMessage('Kon admin gegevens niet laden.')
     } finally {
       setIsLoading(false)
     }
@@ -99,26 +82,15 @@ export default function AdminPage() {
     setIsSavingEmployee(true)
 
     try {
-      const response = await fetch(apiUrl('/api/employees'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName: cleanFirstName, lastName: cleanLastName, pin }),
-      })
-
-      const data = await response.json()
-      if (!response.ok) {
-        setMessage(data.error || 'Toevoegen mislukt.')
-        return
-      }
-
+      const employee = await createEmployee(cleanFirstName, cleanLastName, pin)
       setFirstName('')
       setLastName('')
       setPin('')
-      setMessage(`${data.employee.name} toegevoegd.`)
+      setMessage(`${employee.name} toegevoegd.`)
       await loadAdminData()
     } catch (error) {
       console.error(error)
-      setMessage('Er ging iets mis bij toevoegen.')
+      setMessage(error instanceof Error ? error.message : 'Er ging iets mis bij toevoegen.')
     } finally {
       setIsSavingEmployee(false)
     }

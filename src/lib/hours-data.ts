@@ -6,6 +6,7 @@ export type EmployeeOption = {
 export type EmployeeRecord = EmployeeOption & {
   firstName: string
   lastName: string
+  pin?: string
 }
 
 export const defaultEmployees: EmployeeRecord[] = [
