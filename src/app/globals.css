@@ -19,9 +19,10 @@ html {
 body {
   font-family: 'Inter', sans-serif;
   background:
-    radial-gradient(circle at top, rgba(166, 121, 32, 0.18), transparent 32%),
-    linear-gradient(180deg, #030303 0%, #0a0a0a 28%, #171109 100%);
-  color: #f6f0e4;
+    linear-gradient(rgba(249, 246, 238, 0.82), rgba(239, 232, 217, 0.88)),
+    radial-gradient(circle at top, rgba(170, 145, 96, 0.18), transparent 30%),
+    linear-gradient(180deg, #e8e1d4 0%, #dbd1bf 100%);
+  color: #1f1a14;
   overflow-x: hidden;
 }
 
@@ -102,23 +103,24 @@ body {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(135deg, rgba(201, 162, 39, 0.08), transparent 24%),
-    linear-gradient(315deg, rgba(201, 162, 39, 0.06), transparent 28%);
-  opacity: 0.9;
+    linear-gradient(135deg, rgba(106, 80, 38, 0.08), transparent 24%),
+    linear-gradient(315deg, rgba(167, 146, 111, 0.08), transparent 28%);
+  opacity: 0.95;
 }
 
 .sumo-card {
-  border: 1px solid rgba(166, 121, 32, 0.28);
-  background: linear-gradient(180deg, rgba(22, 18, 14, 0.94), rgba(8, 8, 8, 0.97));
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(92, 73, 47, 0.12);
+  background: rgba(255, 250, 241, 0.68);
+  box-shadow: 0 20px 60px rgba(77, 56, 30, 0.14);
+  backdrop-filter: blur(8px);
 }
 
 .sumo-muted {
-  color: rgba(245, 240, 230, 0.72);
+  color: rgba(52, 43, 33, 0.76);
 }
 
 .sumo-label {
-  color: #c08a2a;
+  color: #8d744e;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-size: 0.72rem;
@@ -127,5 +129,29 @@ body {
 .sumo-divider {
   width: 72px;
   height: 1px;
-  background: linear-gradient(90deg, #a67920, rgba(166, 121, 32, 0));
+  background: linear-gradient(90deg, #9a845c, rgba(154, 132, 92, 0));
+}
+
+.sumo-paper-card {
+  border: 1px solid rgba(92, 73, 47, 0.08);
+  background: rgba(255, 252, 245, 0.72);
+  box-shadow: 0 12px 32px rgba(77, 56, 30, 0.08);
+}
+
+.sumo-dark-button {
+  background: #4d3a26;
+  color: #f7f0e3;
+}
+
+.sumo-dark-button:hover {
+  background: #3e2f1f;
+}
+
+.sumo-light-button {
+  background: #c8c3ad;
+  color: #3f3528;
+}
+
+.sumo-light-button:hover {
+  background: #b8b29a;
 }
