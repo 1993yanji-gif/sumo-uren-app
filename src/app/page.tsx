@@ -1,8 +1,8 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { defaultEmployees, type EmployeeOption } from '@/lib/hours-data'
+import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
 
 function createEmployeeId(firstName: string, lastName: string) {
   return `${firstName} ${lastName}`
@@ -12,12 +12,20 @@ function createEmployeeId(firstName: string, lastName: string) {
     .replace(/[^a-z0-9-]/g, '')
 }
 
+type EmployeeApiRecord = {
+  id: string
+  firstName: string
+  lastName: string
+  name: string
+}
+
 export default function Home() {
   const router = useRouter()
-  const [employees, setEmployees] = useState<EmployeeOption[]>(defaultEmployees)
+  const [employees, setEmployees] = useState<EmployeeRecord[]>(defaultEmployees)
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [employeePin, setEmployeePin] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState(true)
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -25,8 +33,28 @@ export default function Home() {
   const [confirmPin, setConfirmPin] = useState('')
   const [registerMessage, setRegisterMessage] = useState('')
   const [registerError, setRegisterError] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const response = await fetch('/api/employees', { cache: 'no-store' })
+        if (!response.ok) throw new Error('Kon medewerkers niet laden')
+        const data = (await response.json()) as { employees: EmployeeApiRecord[] }
+        if (data.employees?.length) {
+          setEmployees(data.employees)
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setIsLoadingEmployees(false)
+      }
+    }
+
+    loadEmployees()
+  }, [])
+
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!selectedEmployee) {
@@ -39,11 +67,28 @@ export default function Home() {
       return
     }
 
-    setLoginError('')
-    router.push(`/uren?employee=${selectedEmployee}`)
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeId: selectedEmployee, pin: employeePin }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        setLoginError(data.error || 'Inloggen mislukt.')
+        return
+      }
+
+      setLoginError('')
+      router.push(`/uren?employee=${selectedEmployee}`)
+    } catch (error) {
+      console.error(error)
+      setLoginError('Er ging iets mis bij het inloggen.')
+    }
   }
 
-  const handleRegister = (event: FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const cleanFirstName = firstName.trim()
@@ -64,7 +109,6 @@ export default function Home() {
       return
     }
 
-    const name = `${cleanFirstName} ${cleanLastName}`
     const id = createEmployeeId(cleanFirstName, cleanLastName)
     const exists = employees.some((employee) => employee.id === id)
 
@@ -73,16 +117,41 @@ export default function Home() {
       return
     }
 
-    const nextEmployee = { id, name }
-    setEmployees((current) => [...current, nextEmployee])
-    setSelectedEmployee(id)
-    setEmployeePin(newPin)
-    setFirstName('')
-    setLastName('')
-    setNewPin('')
-    setConfirmPin('')
-    setRegisterError('')
-    setRegisterMessage(`${name} is toegevoegd in deze demo. Je kunt nu direct inloggen.`)
+    setIsRegistering(true)
+
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: cleanFirstName,
+          lastName: cleanLastName,
+          pin: newPin,
+        }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        setRegisterError(data.error || 'Aanmaken mislukt.')
+        return
+      }
+
+      const nextEmployee = data.employee as EmployeeRecord
+      setEmployees((current) => [...current, nextEmployee])
+      setSelectedEmployee(nextEmployee.id)
+      setEmployeePin(newPin)
+      setFirstName('')
+      setLastName('')
+      setNewPin('')
+      setConfirmPin('')
+      setRegisterError('')
+      setRegisterMessage(`${nextEmployee.name} is opgeslagen. Je kunt nu direct inloggen.`)
+    } catch (error) {
+      console.error(error)
+      setRegisterError('Er ging iets mis bij het aanmaken.')
+    } finally {
+      setIsRegistering(false)
+    }
   }
 
   return (
@@ -106,9 +175,10 @@ export default function Home() {
               <select
                 value={selectedEmployee}
                 onChange={(event) => setSelectedEmployee(event.target.value)}
+                disabled={isLoadingEmployees}
                 className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
               >
-                <option value="">Kies medewerker</option>
+                <option value="">{isLoadingEmployees ? 'Medewerkers laden...' : 'Kies medewerker'}</option>
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
                     {employee.name}
@@ -145,7 +215,7 @@ export default function Home() {
             <p className="text-sm uppercase tracking-[0.25em] text-amber-300">2. Nieuwe medewerker</p>
             <h2 className="mt-2 font-display text-3xl text-stone-50">Account aanmaken</h2>
             <p className="mt-3 text-sm text-stone-300">
-              Vul naam, achternaam en een 4-cijferige pincode in. In deze stap is het nog een demo-flow en wordt het nog niet permanent opgeslagen.
+              Vul naam, achternaam en een 4-cijferige pincode in. Deze versie slaat medewerkers nu echt op in de database op.
             </p>
 
             <form className="mt-6 space-y-4" onSubmit={handleRegister}>
@@ -189,9 +259,10 @@ export default function Home() {
 
               <button
                 type="submit"
-                className="w-full rounded-2xl border border-amber-400/40 px-5 py-3 text-base font-semibold text-amber-200 transition hover:bg-amber-400/10"
+                disabled={isRegistering}
+                className="w-full rounded-2xl border border-amber-400/40 px-5 py-3 text-base font-semibold text-amber-200 transition hover:bg-amber-400/10 disabled:opacity-60"
               >
-                Nieuwe medewerker aanmaken
+                {isRegistering ? 'Bezig met opslaan...' : 'Nieuwe medewerker aanmaken'}
               </button>
             </form>
 

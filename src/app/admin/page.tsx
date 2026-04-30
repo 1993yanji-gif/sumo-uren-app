@@ -1,44 +1,34 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { defaultEmployees, type EmployeeOption } from '@/lib/hours-data'
+import { type EmployeeRecord } from '@/lib/hours-data'
 
 type TimeEntry = {
-  name: string
-  date: string
-  start: string
-  end: string
+  id: number
+  employeeName: string
+  workDate: string
+  startTime: string
+  endTime: string
   breakMinutes: number
-  hours: number
+  totalHours: number
+  note?: string
 }
-
-const sampleRows: TimeEntry[] = [
-  { name: 'Ahmed', date: '2026-04-29', start: '16:00', end: '22:30', breakMinutes: 30, hours: 6 },
-  { name: 'Lisa', date: '2026-04-29', start: '17:00', end: '23:00', breakMinutes: 20, hours: 5.67 },
-  { name: 'Bo', date: '2026-04-30', start: '12:00', end: '18:00', breakMinutes: 30, hours: 5.5 },
-]
 
 const DEFAULT_ADMIN_PIN = '2580'
 const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
 
-function createEmployeeId(name: string) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-}
-
 export default function AdminPage() {
-  const [employees, setEmployees] = useState<EmployeeOption[]>(defaultEmployees)
+  const [employees, setEmployees] = useState<EmployeeRecord[]>([])
+  const [entries, setEntries] = useState<TimeEntry[]>([])
   const [newEmployeeName, setNewEmployeeName] = useState('')
   const [message, setMessage] = useState('')
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState('')
   const [isUnlocked, setIsUnlocked] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const adminPin = process.env.NEXT_PUBLIC_ADMIN_PIN || DEFAULT_ADMIN_PIN
-  const totalHours = useMemo(() => sampleRows.reduce((sum, row) => sum + row.hours, 0), [])
+  const totalHours = useMemo(() => entries.reduce((sum, row) => sum + row.totalHours, 0), [entries])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -47,6 +37,31 @@ export default function AdminPage() {
       setIsUnlocked(true)
     }
   }, [])
+
+  useEffect(() => {
+    if (!isUnlocked) return
+
+    const loadAdminData = async () => {
+      try {
+        const [employeesResponse, entriesResponse] = await Promise.all([
+          fetch('/api/employees', { cache: 'no-store' }),
+          fetch('/api/time-entries', { cache: 'no-store' }),
+        ])
+
+        const employeesData = await employeesResponse.json()
+        const entriesData = await entriesResponse.json()
+
+        if (employeesResponse.ok) setEmployees(employeesData.employees || [])
+        if (entriesResponse.ok) setEntries(entriesData.entries || [])
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadAdminData()
+  }, [isUnlocked])
 
   const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -63,30 +78,14 @@ export default function AdminPage() {
 
   const handleAddEmployee = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-
-    const trimmedName = newEmployeeName.trim()
-    if (!trimmedName) {
-      setMessage('Voer eerst een naam in.')
-      return
-    }
-
-    const id = createEmployeeId(trimmedName)
-    const exists = employees.some((employee) => employee.id === id || employee.name.toLowerCase() === trimmedName.toLowerCase())
-
-    if (exists) {
-      setMessage('Deze medewerker staat al in de lijst.')
-      return
-    }
-
-    setEmployees((current) => [...current, { id, name: trimmedName }])
+    setMessage('Nieuwe medewerkers voeg je nu toe via de homepage.')
     setNewEmployeeName('')
-    setMessage(`${trimmedName} toegevoegd aan de medewerkerslijst.`)
   }
 
   const handleRemoveEmployee = (employeeId: string) => {
     const employee = employees.find((item) => item.id === employeeId)
     setEmployees((current) => current.filter((item) => item.id !== employeeId))
-    setMessage(employee ? `${employee.name} verwijderd uit de medewerkerslijst.` : 'Medewerker verwijderd.')
+    setMessage(employee ? `${employee.name} is lokaal uit dit overzicht verwijderd. Database-verwijderen bouwen we hierna.` : 'Medewerker verwijderd.')
   }
 
   if (!isUnlocked) {
@@ -122,10 +121,6 @@ export default function AdminPage() {
                 {pinError}
               </div>
             ) : null}
-
-            <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
-              Tijdelijke standaard pincode: <strong>{DEFAULT_ADMIN_PIN}</strong>. Die kan ik daarna voor je aanpassen.
-            </div>
           </div>
         </div>
       </main>
@@ -144,7 +139,7 @@ export default function AdminPage() {
             </p>
           </div>
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-amber-300">Totaal demo uren</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-amber-300">Totaal uren</p>
             <p className="mt-1 text-3xl font-semibold text-stone-50">{totalHours.toFixed(2)} uur</p>
           </div>
         </div>
@@ -163,16 +158,26 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-800 bg-stone-900/60 text-stone-100">
-                {sampleRows.map((row) => (
-                  <tr key={`${row.name}-${row.date}-${row.start}`}>
-                    <td className="px-4 py-3">{row.name}</td>
-                    <td className="px-4 py-3">{row.date}</td>
-                    <td className="px-4 py-3">{row.start}</td>
-                    <td className="px-4 py-3">{row.end}</td>
-                    <td className="px-4 py-3">{row.breakMinutes} min</td>
-                    <td className="px-4 py-3 font-medium text-amber-300">{row.hours.toFixed(2)} uur</td>
+                {isLoading ? (
+                  <tr>
+                    <td className="px-4 py-4 text-stone-400" colSpan={6}>Gegevens laden...</td>
                   </tr>
-                ))}
+                ) : entries.length ? (
+                  entries.map((row) => (
+                    <tr key={row.id}>
+                      <td className="px-4 py-3">{row.employeeName}</td>
+                      <td className="px-4 py-3">{row.workDate}</td>
+                      <td className="px-4 py-3">{row.startTime}</td>
+                      <td className="px-4 py-3">{row.endTime}</td>
+                      <td className="px-4 py-3">{row.breakMinutes} min</td>
+                      <td className="px-4 py-3 font-medium text-amber-300">{row.totalHours.toFixed(2)} uur</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-4 py-4 text-stone-400" colSpan={6}>Nog geen uren opgeslagen.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </section>
@@ -181,7 +186,7 @@ export default function AdminPage() {
             <div>
               <h2 className="font-display text-3xl text-stone-50">Medewerkers beheren</h2>
               <p className="mt-2 text-sm text-stone-300">
-                Voeg medewerkers toe of verwijder ze. In de definitieve versie wordt dit opgeslagen in de database.
+                Nieuwe medewerkers komen nu uit de database via de homepage registratie.
               </p>
             </div>
 
@@ -197,7 +202,7 @@ export default function AdminPage() {
                 type="submit"
                 className="rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
               >
-                Toevoegen
+                Info
               </button>
             </form>
 
@@ -228,10 +233,6 @@ export default function AdminPage() {
               ))}
             </div>
           </aside>
-        </div>
-
-        <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
-          Nu is dit nog demo-state in de browser. Volgende stap: medewerkers en uren echt opslaan in Cloudflare D1.
         </div>
       </div>
     </main>

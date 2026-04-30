@@ -13,11 +13,11 @@ npm run dev
 ```
 
 ## Huidige status
-- Frontend prototype klaar
-- Automatische urenberekening werkt client-side
-- Admin kan medewerkers toevoegen/verwijderen in demo-state
+- Homepage login + medewerker-aanmaak gekoppeld aan Cloudflare Functions
+- Medewerkers worden opgeslagen in D1
+- Uren worden opgeslagen in D1
 - Admin pagina vraagt eerst om een pincode
-- Opslaan is nu nog demo/local-only
+- Admin leest medewerkers en uren uit de database
 
 ## Volgende Cloudflare stappen
 1. Nieuwe Cloudflare Pages/Workers project koppelen
@@ -29,7 +29,10 @@ npm run dev
 - Standaard pincode: `2580`
 - Later aanpasbaar via `NEXT_PUBLIC_ADMIN_PIN`
 
-## Voorstel database
+## Vereiste Cloudflare binding
+- D1 binding naam: `DB`
+
+## Database
 ```sql
 CREATE TABLE time_entries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

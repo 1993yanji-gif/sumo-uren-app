@@ -26,6 +26,9 @@ export default function UrenPage() {
   const [breakMinutes, setBreakMinutes] = useState('30')
   const [note, setNote] = useState('')
   const [saved, setSaved] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -40,9 +43,46 @@ export default function UrenPage() {
     return calculateHours(startTime, endTime, Number(breakMinutes) || 0)
   }, [startTime, endTime, breakMinutes])
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setSaved(true)
+    setSaveError('')
+    setSaveMessage('')
+
+    if (!employeeId) {
+      setSaveError('Kies eerst een medewerker.')
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      const response = await fetch('/api/time-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeId,
+          date,
+          startTime,
+          endTime,
+          breakMinutes: Number(breakMinutes) || 0,
+          note,
+        }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        setSaveError(data.error || 'Opslaan mislukt.')
+        return
+      }
+
+      setSaved(true)
+      setSaveMessage('Uren zijn opgeslagen.')
+    } catch (error) {
+      console.error(error)
+      setSaveError('Er ging iets mis bij het opslaan.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -140,15 +180,28 @@ export default function UrenPage() {
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-amber-400 px-5 py-3 text-base font-semibold text-stone-950 transition hover:bg-amber-300"
+            disabled={isSaving}
+            className="w-full rounded-2xl bg-amber-400 px-5 py-3 text-base font-semibold text-stone-950 transition hover:bg-amber-300 disabled:opacity-60"
           >
-            Uren opslaan
+            {isSaving ? 'Bezig met opslaan...' : 'Uren opslaan'}
           </button>
         </form>
 
-        {saved ? (
+        {saveMessage ? (
           <div className="mt-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
-            Demo: uren zijn lokaal verwerkt. De volgende stap is koppelen aan Cloudflare D1 zodat alles echt wordt opgeslagen.
+            {saveMessage}
+          </div>
+        ) : null}
+
+        {saveError ? (
+          <div className="mt-5 rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-200">
+            {saveError}
+          </div>
+        ) : null}
+
+        {saved ? (
+          <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
+            De uren zijn nu opgeslagen in de database.
           </div>
         ) : null}
       </div>
