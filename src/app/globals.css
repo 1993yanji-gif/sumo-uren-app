@@ -134,7 +134,7 @@ body {
 
 .sumo-paper-card {
   border: 1px solid rgba(92, 73, 47, 0.08);
-  background: rgba(255, 252, 245, 0.72);
+  background: rgba(255, 252, 245, 0.86);
   box-shadow: 0 12px 32px rgba(77, 56, 30, 0.08);
 }
 
@@ -154,4 +154,31 @@ body {
 
 .sumo-light-button:hover {
   background: #b8b29a;
+}
+
+.sumo-input {
+  border: 1px solid rgba(66, 53, 36, 0.18);
+  background: #1b1713;
+  color: #fffaf2;
+}
+
+.sumo-input::placeholder {
+  color: rgba(255, 250, 242, 0.58);
+}
+
+.sumo-input:focus {
+  border-color: #8d744e;
+}
+
+.sumo-soft-panel {
+  border: 1px solid rgba(166, 121, 32, 0.16);
+  background: linear-gradient(180deg, rgba(255, 247, 231, 0.96), rgba(246, 235, 212, 0.92));
+}
+
+.sumo-soft-panel-title {
+  color: #b48a37;
+}
+
+.sumo-soft-panel-text {
+  color: #6b5638;
 }

@@ -158,12 +158,12 @@ export default function UrenPage() {
           <section>
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
-                <label className="mb-2 block text-sm font-medium text-stone-200">Naam medewerker</label>
+                <label className="mb-2 block text-sm font-medium text-stone-700">Naam medewerker</label>
                 <select
                   required
                   value={employeeId}
                   onChange={(e) => setEmployeeId(e.target.value)}
-                  className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                  className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                 >
                   <option value="">Kies je naam</option>
                   {employees.map((employee) => (
@@ -176,31 +176,31 @@ export default function UrenPage() {
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-200">Datum</label>
+                  <label className="mb-2 block text-sm font-medium text-stone-700">Datum</label>
                   <input
                     required
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-200">Pauze (minuten)</label>
+                  <label className="mb-2 block text-sm font-medium text-stone-700">Pauze (minuten)</label>
                   <input
                     min="0"
                     step="5"
                     type="number"
                     value={breakMinutes}
                     onChange={(e) => setBreakMinutes(e.target.value)}
-                    className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                   />
                 </div>
               </div>
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-200">Begintijd</label>
+                  <label className="mb-2 block text-sm font-medium text-stone-700">Begintijd</label>
                   <input
                     required
                     type="text"
@@ -208,11 +208,11 @@ export default function UrenPage() {
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
                     placeholder="11:30"
-                    className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-200">Eindtijd</label>
+                  <label className="mb-2 block text-sm font-medium text-stone-700">Eindtijd</label>
                   <input
                     required
                     type="text"
@@ -220,21 +220,21 @@ export default function UrenPage() {
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                     placeholder="22:00"
-                    className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                   />
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
-                <p className="text-sm uppercase tracking-[0.25em] text-amber-300">Totaal gewerkte uren</p>
-                <p className="mt-2 text-4xl font-semibold text-stone-50">{totalHours.toFixed(2)} uur</p>
-                <p className="mt-2 text-sm text-stone-300">Begintijd - eindtijd - pauze = totaal aantal uren</p>
+              <div className="sumo-soft-panel rounded-2xl p-5">
+                <p className="sumo-soft-panel-title text-sm uppercase tracking-[0.25em]">Totaal gewerkte uren</p>
+                <p className="mt-2 text-4xl font-semibold text-stone-900">{totalHours.toFixed(2)} uur</p>
+                <p className="sumo-soft-panel-text mt-2 text-sm">Begintijd - eindtijd - pauze = totaal aantal uren</p>
               </div>
 
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full rounded-2xl bg-amber-400 px-5 py-3 text-base font-semibold text-stone-950 transition hover:bg-amber-300 disabled:opacity-60"
+                className="sumo-dark-button w-full rounded-2xl px-5 py-3 text-base font-semibold transition disabled:opacity-60"
               >
                 {isSaving ? 'Bezig met opslaan...' : 'Uren opslaan'}
               </button>
