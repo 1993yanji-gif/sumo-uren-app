@@ -5,7 +5,9 @@ import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
 import { createTimeEntry, getEmployeeMonthlyEntries, getEmployees, type TimeEntry } from '@/lib/supabase-hours'
 
 const today = new Date().toISOString().split('T')[0]
-const currentMonth = today.slice(0, 7)
+function getMonthKey(dateValue: string) {
+  return dateValue.slice(0, 7)
+}
 
 function calculateHours(start: string, end: string, breakMinutes: number) {
   if (!start || !end) return 0
@@ -73,7 +75,7 @@ export default function UrenPage() {
 
       setIsLoadingMonthlyEntries(true)
       try {
-        const data = await getEmployeeMonthlyEntries(employeeId, currentMonth)
+        const data = await getEmployeeMonthlyEntries(employeeId, getMonthKey(date))
         setMonthlyEntries(data)
       } catch (error) {
         console.error(error)
@@ -83,7 +85,7 @@ export default function UrenPage() {
     }
 
     loadMonthlyEntries()
-  }, [employeeId])
+  }, [employeeId, date])
 
   const totalHours = useMemo(() => {
     return calculateHours(startTime, endTime, Number(breakMinutes) || 0)
@@ -114,12 +116,17 @@ export default function UrenPage() {
         breakMinutes: Number(breakMinutes) || 0,
       })
 
-      setSaved(true)
+      setSaved(false)
+      setSaveMessage('')
       setSaveMessage('Uren zijn opgeslagen.')
-      const refreshedEntries = await getEmployeeMonthlyEntries(employeeId, currentMonth)
+      const refreshedEntries = await getEmployeeMonthlyEntries(employeeId, getMonthKey(date))
       setMonthlyEntries(refreshedEntries)
+      setSaved(true)
+      setStartTime('')
+      setEndTime('')
     } catch (error) {
       console.error(error)
+      setSaved(false)
       setSaveError(error instanceof Error ? error.message : 'Er ging iets mis bij het opslaan.')
     } finally {
       setIsSaving(false)
@@ -231,11 +238,7 @@ export default function UrenPage() {
               </div>
             ) : null}
 
-            {saved ? (
-              <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/10 p-4 text-sm text-sky-100">
-                De uren zijn nu opgeslagen in Supabase.
-              </div>
-            ) : null}
+            {saved ? null : null}
           </section>
 
           <aside className="rounded-3xl border border-stone-800 bg-stone-950/60 p-5">
