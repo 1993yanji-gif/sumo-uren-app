@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0a0a0a;
+  color: #f5f0e6;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c9a227;
+  border-radius: 2px;
+}
+
+/* Smooth reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Gold line accent */
+.gold-line {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, #c9a227, transparent);
+}
+
+/* Video overlay */
+.video-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.3) 0%,
+    rgba(10, 10, 10, 0.5) 50%,
+    rgba(10, 10, 10, 0.8) 100%
+  );
+}
+
+/* Hover effect for links */
+.link-hover {
+  position: relative;
+}
+
+.link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #c9a227;
+  transition: width 0.3s ease;
+}
+
+.link-hover:hover::after {
+  width: 100%;
+}
