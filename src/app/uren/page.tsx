@@ -143,12 +143,13 @@ export default function UrenPage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
-      <div className="mx-auto max-w-4xl rounded-3xl border border-amber-500/20 bg-stone-900/80 p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
+    <main className="sumo-shell min-h-screen px-4 py-10 text-stone-100 md:px-6 md:py-14">
+      <div className="mx-auto max-w-5xl rounded-[2rem] sumo-card p-6 backdrop-blur md:p-10">
         <div className="mb-8">
-          <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Sumo Markthal</p>
+          <p className="sumo-label mb-2">SUMO Sushi Rotterdam Markthal</p>
           <h1 className="font-display text-4xl text-stone-50 md:text-5xl">Uren registreren</h1>
-          <p className="mt-3 text-sm text-stone-300 md:text-base">
+          <div className="sumo-divider mt-4" />
+          <p className="sumo-muted mt-4 text-sm md:text-base">
             Vul na je dienst je begin- en eindtijd in. Daaronder zie je ook meteen jouw uren van deze maand.
           </p>
         </div>
@@ -254,7 +255,7 @@ export default function UrenPage() {
             {saved ? null : null}
           </section>
 
-          <aside className="rounded-3xl border border-stone-800 bg-stone-950/60 p-5">
+          <aside className="rounded-3xl border border-white/5 bg-black/25 p-5">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="text-sm uppercase tracking-[0.25em] text-amber-300">Jouw uren deze maand</p>

@@ -54,12 +54,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
-      <div className="mx-auto max-w-2xl rounded-3xl border border-amber-500/20 bg-stone-900/80 p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
+    <main className="sumo-shell min-h-screen px-4 py-10 text-stone-100 md:px-6 md:py-14">
+      <div className="mx-auto max-w-3xl rounded-[2rem] sumo-card p-6 backdrop-blur md:p-10">
         <div className="mb-8">
-          <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Nieuwe medewerker</p>
+          <p className="sumo-label mb-2">Nieuwe medewerker</p>
           <h1 className="font-display text-4xl text-stone-50 md:text-5xl">Account aanmaken</h1>
-          <p className="mt-3 text-sm text-stone-300 md:text-base">
+          <div className="sumo-divider mt-4" />
+          <p className="sumo-muted mt-4 text-sm md:text-base">
             Vul voornaam, achternaam en een 4-cijferige pincode in. Daarna kun je via de homepage inloggen.
           </p>
         </div>

@@ -18,7 +18,9 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #0a0a0a;
+  background:
+    radial-gradient(circle at top, rgba(201, 162, 39, 0.14), transparent 32%),
+    linear-gradient(180deg, #050505 0%, #0a0a0a 30%, #120f09 100%);
   color: #f5f0e6;
   overflow-x: hidden;
 }
@@ -88,4 +90,42 @@ body {
 
 .link-hover:hover::after {
   width: 100%;
+}
+
+.sumo-shell {
+  position: relative;
+}
+
+.sumo-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(201, 162, 39, 0.08), transparent 24%),
+    linear-gradient(315deg, rgba(201, 162, 39, 0.06), transparent 28%);
+  opacity: 0.9;
+}
+
+.sumo-card {
+  border: 1px solid rgba(201, 162, 39, 0.18);
+  background: linear-gradient(180deg, rgba(19, 19, 19, 0.9), rgba(10, 10, 10, 0.94));
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.38);
+}
+
+.sumo-muted {
+  color: rgba(245, 240, 230, 0.72);
+}
+
+.sumo-label {
+  color: #d4af37;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.sumo-divider {
+  width: 72px;
+  height: 1px;
+  background: linear-gradient(90deg, #c9a227, rgba(201, 162, 39, 0));
 }

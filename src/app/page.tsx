@@ -53,20 +53,21 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
-      <div className="mx-auto max-w-4xl rounded-3xl border border-amber-500/20 bg-stone-900/80 p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
+    <main className="sumo-shell min-h-screen px-4 py-10 text-stone-100 md:px-6 md:py-14">
+      <div className="mx-auto max-w-5xl rounded-[2rem] sumo-card p-6 backdrop-blur md:p-10">
         <div className="mb-10 max-w-3xl">
-          <p className="mb-3 text-sm uppercase tracking-[0.3em] text-amber-400">Sumo urenregistratie</p>
+          <p className="sumo-label mb-3">SUMO Sushi Rotterdam Markthal</p>
+          <div className="sumo-divider mb-5" />
           <h1 className="font-display text-4xl text-stone-50 md:text-6xl">Welkom terug</h1>
-          <p className="mt-4 text-base leading-relaxed text-stone-300 md:text-lg">
+          <p className="sumo-muted mt-4 text-base leading-relaxed md:text-lg">
             Kies je naam, vul je pincode in en ga direct door naar je urenregistratie. Nieuwe medewerker? Maak hieronder eerst een nieuw account aan.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-stone-800 bg-stone-950/60 p-6">
-          <p className="text-sm uppercase tracking-[0.25em] text-amber-300">Inloggen medewerker</p>
+        <div className="rounded-3xl border border-white/5 bg-black/25 p-6">
+          <p className="sumo-label">Inloggen medewerker</p>
           <h2 className="mt-2 font-display text-3xl text-stone-50">Selecteer medewerker</h2>
-          <p className="mt-3 text-sm text-stone-300">Kies je naam en vul je 4-cijferige pincode in om je uren te registreren.</p>
+          <p className="sumo-muted mt-3 text-sm">Kies je naam en vul je 4-cijferige pincode in om je uren te registreren.</p>
 
           <form className="mt-6 space-y-4" onSubmit={handleLogin}>
             <select

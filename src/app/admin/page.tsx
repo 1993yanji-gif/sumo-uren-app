@@ -104,7 +104,7 @@ export default function AdminPage() {
 
   if (!isUnlocked) {
     return (
-      <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
+      <main className="sumo-shell min-h-screen px-4 py-10 text-stone-100 md:px-6 md:py-14">
         <div className="mx-auto flex min-h-[80vh] max-w-lg items-center">
           <div className="w-full rounded-3xl border border-amber-500/20 bg-stone-900/80 p-8 shadow-2xl shadow-black/30 backdrop-blur">
             <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Admin beveiliging</p>
@@ -142,13 +142,13 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
-      <div className="mx-auto max-w-6xl rounded-3xl border border-amber-500/20 bg-stone-900/80 p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
+    <main className="sumo-shell min-h-screen px-4 py-10 text-stone-100 md:px-6 md:py-14">
+      <div className="mx-auto max-w-6xl rounded-[2rem] sumo-card p-6 backdrop-blur md:p-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Admin</p>
+            <p className="sumo-label mb-2">Admin</p>
             <h1 className="font-display text-4xl text-stone-50 md:text-5xl">Uren overzicht</h1>
-            <p className="mt-3 text-sm text-stone-300 md:text-base">
+            <p className="sumo-muted mt-3 text-sm md:text-base">
               Alleen voor jou zichtbaar. Hier zie je alle ingevoerde uren en beheer je ook de medewerkerslijst.
             </p>
           </div>
