@@ -37,24 +37,24 @@ export default function UrenPage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
-      <div className="mx-auto max-w-2xl rounded-3xl border border-amber-500/20 bg-stone-900/80 p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
+    <main className="min-h-screen px-4 py-10 text-rose-950">
+      <div className="mx-auto max-w-2xl rounded-[2rem] border border-rose-200/80 bg-white/85 p-6 shadow-[0_24px_80px_rgba(244,114,182,0.14)] backdrop-blur md:p-8">
         <div className="mb-8">
-          <p className="mb-2 text-sm uppercase tracking-[0.3em] text-amber-400">Sumo Markthal</p>
-          <h1 className="font-display text-4xl text-stone-50 md:text-5xl">Uren registreren</h1>
-          <p className="mt-3 text-sm text-stone-300 md:text-base">
+          <p className="mb-2 text-sm uppercase tracking-[0.3em] text-rose-400">Sumo Markthal</p>
+          <h1 className="font-display text-4xl text-rose-950 md:text-5xl">Uren registreren</h1>
+          <p className="mt-3 text-sm text-rose-900/70 md:text-base">
             Vul na je dienst je begin- en eindtijd in. De app berekent automatisch je totale uren.
           </p>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label className="mb-2 block text-sm font-medium text-stone-200">Naam medewerker</label>
+            <label className="mb-2 block text-sm font-medium text-rose-900">Naam medewerker</label>
             <select
               required
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+              className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 outline-none transition focus:border-rose-400"
             >
               <option value="">Kies je naam</option>
               {defaultEmployees.map((employee) => (
@@ -67,78 +67,78 @@ export default function UrenPage() {
 
           <div className="grid gap-5 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-200">Datum</label>
+              <label className="mb-2 block text-sm font-medium text-rose-900">Datum</label>
               <input
                 required
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 outline-none transition focus:border-rose-400"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-200">Pauze (minuten)</label>
+              <label className="mb-2 block text-sm font-medium text-rose-900">Pauze (minuten)</label>
               <input
                 min="0"
                 step="5"
                 type="number"
                 value={breakMinutes}
                 onChange={(e) => setBreakMinutes(e.target.value)}
-                className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 outline-none transition focus:border-rose-400"
               />
             </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-200">Begintijd</label>
+              <label className="mb-2 block text-sm font-medium text-rose-900">Begintijd</label>
               <input
                 required
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 outline-none transition focus:border-rose-400"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-200">Eindtijd</label>
+              <label className="mb-2 block text-sm font-medium text-rose-900">Eindtijd</label>
               <input
                 required
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+                className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 outline-none transition focus:border-rose-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-stone-200">Opmerking (optioneel)</label>
+            <label className="mb-2 block text-sm font-medium text-rose-900">Opmerking (optioneel)</label>
             <textarea
               rows={3}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Bijvoorbeeld: extra schoonmaak of dienst geruild"
-              className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
+              className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 outline-none transition focus:border-rose-400"
             />
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
-            <p className="text-sm uppercase tracking-[0.25em] text-amber-300">Totaal gewerkte uren</p>
-            <p className="mt-2 text-4xl font-semibold text-stone-50">{totalHours.toFixed(2)} uur</p>
-            <p className="mt-2 text-sm text-stone-300">Begintijd - eindtijd - pauze = totaal aantal uren</p>
+          <div className="rounded-2xl border border-pink-200 bg-gradient-to-r from-rose-50 to-pink-50 p-5">
+            <p className="text-sm uppercase tracking-[0.25em] text-rose-400">Totaal gewerkte uren</p>
+            <p className="mt-2 text-4xl font-semibold text-rose-950">{totalHours.toFixed(2)} uur</p>
+            <p className="mt-2 text-sm text-rose-900/70">Begintijd - eindtijd - pauze = totaal aantal uren</p>
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-amber-400 px-5 py-3 text-base font-semibold text-stone-950 transition hover:bg-amber-300"
+            className="w-full rounded-2xl bg-gradient-to-r from-rose-400 to-pink-400 px-5 py-3 text-base font-semibold text-white transition hover:opacity-95"
           >
             Uren opslaan
           </button>
         </form>
 
         {saved ? (
-          <div className="mt-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+          <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
             Demo: uren zijn lokaal verwerkt. De volgende stap is koppelen aan Cloudflare D1 zodat alles echt wordt opgeslagen.
           </div>
         ) : null}
