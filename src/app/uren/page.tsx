@@ -9,8 +9,12 @@ function getMonthKey(dateValue: string) {
   return dateValue.slice(0, 7)
 }
 
+function isValidTime(value: string) {
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value)
+}
+
 function calculateHours(start: string, end: string, breakMinutes: number) {
-  if (!start || !end) return 0
+  if (!isValidTime(start) || !isValidTime(end)) return 0
 
   const [startHour, startMinute] = start.split(':').map(Number)
   const [endHour, endMinute] = end.split(':').map(Number)
@@ -105,6 +109,11 @@ export default function UrenPage() {
       return
     }
 
+    if (!isValidTime(startTime) || !isValidTime(endTime)) {
+      setSaveError('Vul begintijd en eindtijd in als HH:MM, bijvoorbeeld 11:30.')
+      return
+    }
+
     setIsSaving(true)
 
     try {
@@ -193,9 +202,11 @@ export default function UrenPage() {
                   <label className="mb-2 block text-sm font-medium text-stone-200">Begintijd</label>
                   <input
                     required
-                    type="time"
+                    type="text"
+                    inputMode="numeric"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
+                    placeholder="11:30"
                     className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
                   />
                 </div>
@@ -203,9 +214,11 @@ export default function UrenPage() {
                   <label className="mb-2 block text-sm font-medium text-stone-200">Eindtijd</label>
                   <input
                     required
-                    type="time"
+                    type="text"
+                    inputMode="numeric"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
+                    placeholder="22:00"
                     className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
                   />
                 </div>
