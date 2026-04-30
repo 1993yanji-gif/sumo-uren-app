@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { defaultEmployees } from '@/lib/hours-data'
 
 const today = new Date().toISOString().split('T')[0]
@@ -26,6 +26,15 @@ export default function UrenPage() {
   const [breakMinutes, setBreakMinutes] = useState('30')
   const [note, setNote] = useState('')
   const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const employeeFromQuery = params.get('employee') || ''
+    if (employeeFromQuery) {
+      setEmployeeId(employeeFromQuery)
+    }
+  }, [])
 
   const totalHours = useMemo(() => {
     return calculateHours(startTime, endTime, Number(breakMinutes) || 0)
