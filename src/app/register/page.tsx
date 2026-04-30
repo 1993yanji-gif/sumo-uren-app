@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
+import { apiUrl } from '@/lib/api-base'
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('')
@@ -38,7 +39,7 @@ export default function RegisterPage() {
     setRegisterMessage('')
 
     try {
-      const response = await fetch('/api/employees', {
+      const response = await fetch(apiUrl('/api/employees'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

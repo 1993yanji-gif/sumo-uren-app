@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
+import { apiUrl } from '@/lib/api-base'
 
 type EmployeeApiRecord = {
   id: string
@@ -23,7 +24,7 @@ export default function Home() {
   useEffect(() => {
     const loadEmployees = async () => {
       try {
-        const response = await fetch('/api/employees', { cache: 'no-store' })
+        const response = await fetch(apiUrl('/api/employees'), { cache: 'no-store' })
         if (!response.ok) throw new Error('Kon medewerkers niet laden')
         const data = (await response.json()) as { employees: EmployeeApiRecord[] }
         if (data.employees?.length) {
@@ -53,7 +54,7 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch(apiUrl('/api/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ employeeId: selectedEmployee, pin: employeePin }),

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { defaultEmployees } from '@/lib/hours-data'
+import { apiUrl } from '@/lib/api-base'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -56,7 +57,7 @@ export default function UrenPage() {
     setIsSaving(true)
 
     try {
-      const response = await fetch('/api/time-entries', {
+      const response = await fetch(apiUrl('/api/time-entries'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

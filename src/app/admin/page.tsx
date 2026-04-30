@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { type EmployeeRecord } from '@/lib/hours-data'
+import { apiUrl } from '@/lib/api-base'
 
 type TimeEntry = {
   id: number
@@ -36,8 +37,8 @@ export default function AdminPage() {
   const loadAdminData = async () => {
     try {
       const [employeesResponse, entriesResponse] = await Promise.all([
-        fetch('/api/employees', { cache: 'no-store' }),
-        fetch('/api/time-entries', { cache: 'no-store' }),
+        fetch(apiUrl('/api/employees'), { cache: 'no-store' }),
+        fetch(apiUrl('/api/time-entries'), { cache: 'no-store' }),
       ])
 
       const employeesData = await employeesResponse.json()
@@ -98,7 +99,7 @@ export default function AdminPage() {
     setIsSavingEmployee(true)
 
     try {
-      const response = await fetch('/api/employees', {
+      const response = await fetch(apiUrl('/api/employees'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName: cleanFirstName, lastName: cleanLastName, pin }),

@@ -1,0 +1,8 @@
+name = "sumo-uren-api"
+main = "worker.js"
+compatibility_date = "2026-04-30"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sumo-uren-data"
+database_id = "6fddf4ea-29b0-49a5-92ba-a811a1cc12ac"

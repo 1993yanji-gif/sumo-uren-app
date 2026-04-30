@@ -30,7 +30,13 @@ npm run dev
 - Later aanpasbaar via `NEXT_PUBLIC_ADMIN_PIN`
 
 ## Vereiste Cloudflare binding
-- D1 binding naam: `DB`
+- Pages frontend gebruikt straks `NEXT_PUBLIC_API_BASE_URL`
+- Aparte Worker API gebruikt D1 binding naam: `DB`
+
+## Worker API
+- map: `worker-api/`
+- worker naam: `sumo-uren-api`
+- routes: `/api/employees`, `/api/login`, `/api/time-entries`
 
 ## Database
 ```sql
