@@ -26,7 +26,6 @@ export default function UrenPage() {
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [breakMinutes, setBreakMinutes] = useState('30')
-  const [note, setNote] = useState('')
   const [saved, setSaved] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [saveError, setSaveError] = useState('')
@@ -77,7 +76,6 @@ export default function UrenPage() {
         startTime,
         endTime,
         breakMinutes: Number(breakMinutes) || 0,
-        note,
       })
 
       setSaved(true)
@@ -164,17 +162,6 @@ export default function UrenPage() {
                 className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-stone-200">Opmerking (optioneel)</label>
-            <textarea
-              rows={3}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Bijvoorbeeld: extra schoonmaak of dienst geruild"
-              className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 outline-none transition focus:border-amber-400"
-            />
           </div>
 
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">

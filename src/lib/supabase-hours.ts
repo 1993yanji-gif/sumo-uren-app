@@ -141,7 +141,6 @@ export async function createTimeEntry(input: {
   startTime: string
   endTime: string
   breakMinutes: number
-  note: string
 }) {
   const [startHour, startMinute] = input.startTime.split(':').map(Number)
   const [endHour, endMinute] = input.endTime.split(':').map(Number)
@@ -156,7 +155,7 @@ export async function createTimeEntry(input: {
     end_time: input.endTime,
     break_minutes: input.breakMinutes,
     total_hours: totalHours,
-    note: input.note,
+    note: '',
   })
 
   if (error) throw error
