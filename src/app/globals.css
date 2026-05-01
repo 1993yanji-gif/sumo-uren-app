@@ -21,9 +21,9 @@
   --sumo-border-strong: rgba(97, 74, 42, 0.18);
   --sumo-highlight: #b6904d;
   --sumo-highlight-soft: rgba(193, 157, 91, 0.16);
-  --sumo-input-bg: #211b16;
+  --sumo-input-bg: #4b3524;
   --sumo-input-text: #fff9f1;
-  --sumo-input-placeholder: rgba(255, 249, 241, 0.58);
+  --sumo-input-placeholder: rgba(255, 249, 241, 0.68);
   --sumo-success-bg: rgba(64, 128, 88, 0.1);
   --sumo-success-border: rgba(64, 128, 88, 0.24);
   --sumo-success-text: #285c3a;
