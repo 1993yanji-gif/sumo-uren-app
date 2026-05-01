@@ -371,9 +371,6 @@ export default function UrenPage() {
             </div>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <button type="button" onClick={() => handleEmployeeExport('csv')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
-                Exporteer CSV
-              </button>
               <button type="button" onClick={() => handleEmployeeExport('excel')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
                 Exporteer Excel
               </button>
