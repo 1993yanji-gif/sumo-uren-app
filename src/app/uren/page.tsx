@@ -7,9 +7,26 @@ import { createTimeEntry, getEmployeeMonthlyEntries, getEmployees, type TimeEntr
 import { exportToCsv, exportToExcel, exportToPdf, mapEntriesForExport } from '@/lib/export-utils'
 
 const today = new Date().toISOString().split('T')[0]
+const currentMonthKey = today.slice(0, 7)
 
 function getMonthKey(dateValue: string) {
   return dateValue.slice(0, 7)
+}
+
+function shiftMonth(monthKey: string, diff: number) {
+  const [year, month] = monthKey.split('-').map(Number)
+  const date = new Date(year, month - 1 + diff, 1)
+  const shiftedYear = date.getFullYear()
+  const shiftedMonth = String(date.getMonth() + 1).padStart(2, '0')
+  return `${shiftedYear}-${shiftedMonth}`
+}
+
+function formatMonthLabel(monthKey: string) {
+  const [year, month] = monthKey.split('-').map(Number)
+  return new Intl.DateTimeFormat('nl-NL', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(year, month - 1, 1))
 }
 
 function isValidTime(value: string) {
@@ -119,6 +136,7 @@ export default function UrenPage() {
   const [employeeId, setEmployeeId] = useState('')
   const [employeeLoadError, setEmployeeLoadError] = useState('')
   const [date, setDate] = useState(today)
+  const [overviewMonth, setOverviewMonth] = useState(currentMonthKey)
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [breakMinutes, setBreakMinutes] = useState('30')
@@ -160,7 +178,7 @@ export default function UrenPage() {
 
       setIsLoadingMonthlyEntries(true)
       try {
-        const data = await getEmployeeMonthlyEntries(employeeId, getMonthKey(date))
+        const data = await getEmployeeMonthlyEntries(employeeId, overviewMonth)
         setMonthlyEntries(data)
       } catch (error) {
         console.error(error)
@@ -170,7 +188,7 @@ export default function UrenPage() {
     }
 
     loadMonthlyEntries()
-  }, [employeeId, date])
+  }, [employeeId, overviewMonth])
 
   const validation = useMemo(() => {
     return getValidation(startTime, endTime, Number(breakMinutes) || 0)
@@ -191,7 +209,7 @@ export default function UrenPage() {
     }
 
     const rows = mapEntriesForExport(monthlyEntries)
-    const monthKey = getMonthKey(date)
+    const monthKey = overviewMonth
     const safeName = selectedEmployeeName.toLowerCase().replace(/\s+/g, '-')
     const baseFilename = `maandoverzicht-${safeName}-${monthKey}`
 
@@ -235,7 +253,7 @@ export default function UrenPage() {
       })
 
       setSaveMessage('Uren zijn opgeslagen.')
-      const refreshedEntries = await getEmployeeMonthlyEntries(employeeId, getMonthKey(date))
+      const refreshedEntries = await getEmployeeMonthlyEntries(employeeId, overviewMonth)
       setMonthlyEntries(refreshedEntries)
       setStartTime('')
       setEndTime('')
@@ -365,8 +383,19 @@ export default function UrenPage() {
           <aside className="sumo-panel rounded-[1.75rem] p-5 md:p-6">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="sumo-label">Jouw uren deze maand</p>
+                <p className="sumo-label">Jouw uren</p>
                 <h2 className="mt-2 font-display text-3xl text-stone-900">Maandoverzicht</h2>
+                <div className="mt-3 flex items-center gap-2">
+                  <button type="button" onClick={() => setOverviewMonth((current) => shiftMonth(current, -1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                    Vorige
+                  </button>
+                  <div className="rounded-2xl border border-[rgba(97,74,42,0.12)] bg-[rgba(255,251,244,0.74)] px-4 py-2 text-sm font-semibold text-stone-900">
+                    {formatMonthLabel(overviewMonth)}
+                  </div>
+                  <button type="button" onClick={() => setOverviewMonth((current) => shiftMonth(current, 1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                    Volgende
+                  </button>
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Totaal maand</p>
