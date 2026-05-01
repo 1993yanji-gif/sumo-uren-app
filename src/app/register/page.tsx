@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
-import { createEmployee } from '@/lib/cloudflare-hours'
+import { createEmployee } from '@/lib/supabase-hours'
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('')

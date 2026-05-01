@@ -98,6 +98,26 @@ export async function createEmployee(firstName: string, lastName: string, pin: s
   }
 }
 
+export async function updateEmployeePin(employeeId: string, pin: string) {
+  if (!/^\d{4}$/.test(pin)) {
+    throw new Error('Pincode moet uit 4 cijfers bestaan.')
+  }
+
+  const { data, error } = await supabase
+    .from('employees')
+    .update({ pin })
+    .eq('id', employeeId)
+    .select('id, display_name')
+    .single()
+
+  if (error) throw error
+
+  return {
+    id: data.id,
+    name: data.display_name,
+  }
+}
+
 export async function loginEmployee(employeeId: string, pin: string) {
   const { data, error } = await supabase
     .from('employees')

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { type EmployeeRecord } from '@/lib/hours-data'
-import { createEmployee, getEmployees, getTimeEntries, updateEmployeePin, type TimeEntry } from '@/lib/cloudflare-hours'
+import { createEmployee, getEmployees, getTimeEntries, updateEmployeePin, type TimeEntry } from '@/lib/supabase-hours'
 
 const DEFAULT_ADMIN_PIN = '2580'
 const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'

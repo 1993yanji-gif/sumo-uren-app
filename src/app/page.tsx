@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
-import { getEmployees, loginEmployee } from '@/lib/cloudflare-hours'
+import { getEmployees, loginEmployee } from '@/lib/supabase-hours'
 
 export default function Home() {
   const router = useRouter()
