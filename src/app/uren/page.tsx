@@ -348,10 +348,12 @@ export default function UrenPage() {
                   <label className="mb-3 block text-sm font-semibold text-stone-800">Begintijd</label>
                   <input
                     required
-                    type="time"
-                    step="60"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{2}:[0-9]{2}"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
+                    placeholder="08:30"
                     className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"
                   />
                   {validation.fieldErrors.startTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.startTime}</p> : null}
@@ -360,10 +362,12 @@ export default function UrenPage() {
                   <label className="mb-3 block text-sm font-semibold text-stone-800">Eindtijd</label>
                   <input
                     required
-                    type="time"
-                    step="60"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{2}:[0-9]{2}"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
+                    placeholder="17:00"
                     className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"
                   />
                   {validation.fieldErrors.endTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.endTime}</p> : null}
