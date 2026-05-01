@@ -267,9 +267,12 @@ export default function AdminPage() {
     if (!editingEntryId) return
 
     const breakMinutes = Number(editingEntryForm.breakMinutes)
+    const normalizedDate = editingEntryForm.date.includes('-')
+      ? editingEntryForm.date
+      : editingEntryForm.date.split('/').reverse().join('-')
 
-    if (!editingEntryForm.date) {
-      setMessage('Kies een datum.')
+    if (!normalizedDate || !/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) {
+      setMessage('Kies een geldige datum.')
       return
     }
 
@@ -283,15 +286,12 @@ export default function AdminPage() {
       return
     }
 
-    const confirmed = window.confirm('Weet je zeker dat je deze urenregel wilt bijwerken?')
-    if (!confirmed) return
-
     setIsUpdatingEntry(true)
-    setMessage('')
+    setMessage('Bezig met opslaan...')
     try {
       await updateTimeEntry({
         id: editingEntryId,
-        date: editingEntryForm.date,
+        date: normalizedDate,
         startTime: editingEntryForm.startTime,
         endTime: editingEntryForm.endTime,
         breakMinutes,
@@ -539,7 +539,7 @@ export default function AdminPage() {
 
                           <div className="mt-4 flex flex-wrap gap-2">
                             <button type="button" onClick={saveEditedEntry} disabled={isUpdatingEntry} className="sumo-dark-button rounded-2xl px-4 py-2 text-sm font-semibold transition disabled:opacity-60">
-                              {isUpdatingEntry ? 'Opslaan...' : 'Wijziging opslaan'}
+                              {isUpdatingEntry ? 'Bezig met opslaan...' : 'Opslaan'}
                             </button>
                             <button type="button" onClick={cancelEditingEntry} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
                               Annuleren
