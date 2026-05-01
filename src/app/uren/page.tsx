@@ -117,6 +117,7 @@ function formatWorkDate(value: string) {
 export default function UrenPage() {
   const [employees, setEmployees] = useState<EmployeeRecord[]>([])
   const [employeeId, setEmployeeId] = useState('')
+  const [employeeLoadError, setEmployeeLoadError] = useState('')
   const [date, setDate] = useState(today)
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
@@ -134,6 +135,7 @@ export default function UrenPage() {
         if (data.length) setEmployees(data)
       } catch (error) {
         console.error(error)
+        setEmployeeLoadError('Kon medewerker niet laden uit Supabase.')
       }
     }
 
@@ -265,21 +267,11 @@ export default function UrenPage() {
         <div className="grid gap-6 lg:grid-cols-[1fr,0.95fr]">
           <section className="sumo-paper-card rounded-[1.75rem] p-6 md:p-8">
             <form className="space-y-5" onSubmit={handleSubmit}>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-stone-700">Naam medewerker</label>
-                <select
-                  required
-                  value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value)}
-                  className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
-                >
-                  <option value="">Kies je naam</option>
-                  {employees.map((employee) => (
-                    <option key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="sumo-panel rounded-2xl px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-stone-500">Medewerker</p>
+                <p className="mt-2 text-lg font-semibold text-stone-900">{selectedEmployeeName}</p>
+                {employeeLoadError ? <p className="mt-2 text-sm text-red-600">{employeeLoadError}</p> : null}
+                {!employeeId ? <p className="mt-2 text-sm text-red-600">Geen medewerker gekozen. Ga terug naar home en log opnieuw in.</p> : null}
               </div>
 
               <div className="grid gap-5 md:grid-cols-2">
