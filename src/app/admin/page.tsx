@@ -507,16 +507,39 @@ export default function AdminPage() {
                   latestEntries.map((row) => (
                     <div key={row.id} className="sumo-panel rounded-2xl px-4 py-4">
                       {editingEntryId === row.id ? (
-                        <div className="space-y-3">
-                          <div className="grid gap-3 md:grid-cols-4">
-                            <input type="date" value={editingEntryForm.date} onChange={(event) => setEditingEntryForm((current) => ({ ...current, date: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
-                            <input type="time" value={editingEntryForm.startTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, startTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
-                            <input type="time" value={editingEntryForm.endTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, endTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
-                            <input type="number" min="0" step="5" value={editingEntryForm.breakMinutes} onChange={(event) => setEditingEntryForm((current) => ({ ...current, breakMinutes: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                        <div className="rounded-[1.5rem] border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.9)] p-4 md:p-5">
+                          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                            <div>
+                              <p className="font-medium text-stone-900">Bewerk urenregel van {row.employeeName}</p>
+                              <p className="mt-1 text-sm text-stone-500">Pas datum, tijden en pauze aan en sla daarna op.</p>
+                            </div>
+                            <div className="rounded-2xl bg-[rgba(193,157,91,0.12)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#8c6a2f]">
+                              Regel #{row.id}
+                            </div>
                           </div>
-                          <div className="flex flex-wrap gap-2">
+
+                          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <label className="grid gap-2 text-sm text-stone-600">
+                              <span className="font-medium text-stone-900">Datum</span>
+                              <input type="date" value={editingEntryForm.date} onChange={(event) => setEditingEntryForm((current) => ({ ...current, date: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                            </label>
+                            <label className="grid gap-2 text-sm text-stone-600">
+                              <span className="font-medium text-stone-900">Begintijd</span>
+                              <input type="time" value={editingEntryForm.startTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, startTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                            </label>
+                            <label className="grid gap-2 text-sm text-stone-600">
+                              <span className="font-medium text-stone-900">Eindtijd</span>
+                              <input type="time" value={editingEntryForm.endTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, endTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                            </label>
+                            <label className="grid gap-2 text-sm text-stone-600">
+                              <span className="font-medium text-stone-900">Pauze (min)</span>
+                              <input type="number" min="0" step="5" value={editingEntryForm.breakMinutes} onChange={(event) => setEditingEntryForm((current) => ({ ...current, breakMinutes: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                            </label>
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap gap-2">
                             <button type="button" onClick={saveEditedEntry} disabled={isUpdatingEntry} className="sumo-dark-button rounded-2xl px-4 py-2 text-sm font-semibold transition disabled:opacity-60">
-                              {isUpdatingEntry ? 'Opslaan...' : 'Opslaan'}
+                              {isUpdatingEntry ? 'Opslaan...' : 'Wijziging opslaan'}
                             </button>
                             <button type="button" onClick={cancelEditingEntry} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
                               Annuleren
