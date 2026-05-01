@@ -121,28 +121,30 @@ export default function Home() {
               className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
             />
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="space-y-3">
               <button
                 type="submit"
                 disabled={!isLoginValid}
-                className="sumo-dark-button rounded-2xl px-5 py-3 text-base font-semibold transition disabled:opacity-50"
+                className="sumo-dark-button w-full rounded-2xl px-5 py-3 text-base font-semibold transition disabled:opacity-50"
               >
                 Verder naar uren
               </button>
 
-              <Link
-                href="/register"
-                className="sumo-light-button rounded-2xl px-5 py-3 text-center text-base font-semibold transition"
-              >
-                Nieuwe medewerker
-              </Link>
+              <div className="flex flex-col items-center gap-3 text-sm md:flex-row md:justify-between">
+                <Link
+                  href="/register"
+                  className="font-semibold text-[#8c6a2f] transition hover:text-[#6f5226]"
+                >
+                  Nieuwe medewerker
+                </Link>
 
-              <Link
-                href="/admin"
-                className="sumo-ghost-button rounded-2xl px-5 py-3 text-center text-base font-semibold transition"
-              >
-                Admin
-              </Link>
+                <Link
+                  href="/admin"
+                  className="text-stone-500 transition hover:text-stone-700"
+                >
+                  Admin
+                </Link>
+              </div>
             </div>
           </form>
 
