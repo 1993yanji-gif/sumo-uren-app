@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { type EmployeeRecord, type EmployeeSummary } from '@/lib/hours-data'
 import {
-  createEmployee,
+  deleteTimeEntry,
   getEmployees,
   getTimeEntries,
   setEmployeeActiveStatus,
   summarizeEmployeeEntries,
   updateEmployeePin,
+  updateTimeEntry,
   type TimeEntry,
 } from '@/lib/supabase-hours'
 import { exportToCsv, exportToExcel, exportToPdf, mapEntriesForExport } from '@/lib/export-utils'
@@ -80,8 +81,6 @@ function formatDate(value: string | null) {
 export default function AdminPage() {
   const [employees, setEmployees] = useState<EmployeeRecord[]>([])
   const [entries, setEntries] = useState<TimeEntry[]>([])
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [pin, setPin] = useState('')
   const [message, setMessage] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -90,7 +89,6 @@ export default function AdminPage() {
   const [pinError, setPinError] = useState('')
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSavingEmployee, setIsSavingEmployee] = useState(false)
   const [isUpdatingPinFor, setIsUpdatingPinFor] = useState<string | null>(null)
   const [isUpdatingStatusFor, setIsUpdatingStatusFor] = useState<string | null>(null)
   const [dateFilter, setDateFilter] = useState<DateFilter>('month')
@@ -99,6 +97,9 @@ export default function AdminPage() {
   const [sortOption, setSortOption] = useState<SortOption>('recent')
   const [openEmployeeCards, setOpenEmployeeCards] = useState<Record<string, boolean>>({})
   const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active')
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null)
+  const [editingEntryForm, setEditingEntryForm] = useState({ date: '', startTime: '', endTime: '', breakMinutes: '30' })
+  const [isUpdatingEntry, setIsUpdatingEntry] = useState(false)
 
   const adminPin = process.env.NEXT_PUBLIC_ADMIN_PIN || DEFAULT_ADMIN_PIN
 
@@ -182,40 +183,6 @@ export default function AdminPage() {
     setPinError('Onjuiste pincode.')
   }
 
-  const handleAddEmployee = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setMessage('')
-
-    const cleanFirstName = firstName.trim()
-    const cleanLastName = lastName.trim()
-
-    if (!cleanFirstName || !cleanLastName) {
-      setMessage('Vul voornaam en achternaam in.')
-      return
-    }
-
-    if (!/^\d{4}$/.test(pin)) {
-      setMessage('Pincode moet uit 4 cijfers bestaan.')
-      return
-    }
-
-    setIsSavingEmployee(true)
-
-    try {
-      const employee = await createEmployee(cleanFirstName, cleanLastName, pin)
-      setFirstName('')
-      setLastName('')
-      setPin('')
-      setMessage(`${employee.name} toegevoegd.`)
-      await loadAdminData()
-    } catch (error) {
-      console.error(error)
-      setMessage(error instanceof Error ? error.message : 'Er ging iets mis bij toevoegen.')
-    } finally {
-      setIsSavingEmployee(false)
-    }
-  }
-
   const handlePinValueChange = (employeeId: string, value: string) => {
     setResetPinValues((current) => ({
       ...current,
@@ -280,6 +247,60 @@ export default function AdminPage() {
       ...current,
       [employeeId]: !current[employeeId],
     }))
+  }
+
+  const startEditingEntry = (entry: TimeEntry) => {
+    setEditingEntryId(entry.id)
+    setEditingEntryForm({
+      date: entry.workDate,
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      breakMinutes: String(entry.breakMinutes),
+    })
+  }
+
+  const cancelEditingEntry = () => {
+    setEditingEntryId(null)
+  }
+
+  const saveEditedEntry = async () => {
+    if (!editingEntryId) return
+
+    const confirmed = window.confirm('Weet je zeker dat je deze urenregel wilt bijwerken?')
+    if (!confirmed) return
+
+    setIsUpdatingEntry(true)
+    try {
+      await updateTimeEntry({
+        id: editingEntryId,
+        date: editingEntryForm.date,
+        startTime: editingEntryForm.startTime,
+        endTime: editingEntryForm.endTime,
+        breakMinutes: Number(editingEntryForm.breakMinutes) || 0,
+      })
+      setMessage('Urenregel bijgewerkt.')
+      setEditingEntryId(null)
+      await loadAdminData()
+    } catch (error) {
+      console.error(error)
+      setMessage(error instanceof Error ? error.message : 'Bijwerken mislukt.')
+    } finally {
+      setIsUpdatingEntry(false)
+    }
+  }
+
+  const removeEntry = async (entryId: number) => {
+    const confirmed = window.confirm('Weet je zeker dat je deze urenregel wilt verwijderen?')
+    if (!confirmed) return
+
+    try {
+      await deleteTimeEntry(entryId)
+      setMessage('Urenregel verwijderd.')
+      await loadAdminData()
+    } catch (error) {
+      console.error(error)
+      setMessage(error instanceof Error ? error.message : 'Verwijderen mislukt.')
+    }
   }
 
   const handleAdminExport = (type: 'csv' | 'excel' | 'pdf') => {
@@ -468,16 +489,43 @@ export default function AdminPage() {
                 ) : latestEntries.length ? (
                   latestEntries.map((row) => (
                     <div key={row.id} className="sumo-panel rounded-2xl px-4 py-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="font-medium text-stone-900">{row.employeeName}</p>
-                          <p className="mt-1 text-sm text-stone-500">{row.workDate} · {row.startTime} - {row.endTime}</p>
+                      {editingEntryId === row.id ? (
+                        <div className="space-y-3">
+                          <div className="grid gap-3 md:grid-cols-4">
+                            <input type="date" value={editingEntryForm.date} onChange={(event) => setEditingEntryForm((current) => ({ ...current, date: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                            <input type="time" value={editingEntryForm.startTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, startTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                            <input type="time" value={editingEntryForm.endTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, endTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                            <input type="number" min="0" step="5" value={editingEntryForm.breakMinutes} onChange={(event) => setEditingEntryForm((current) => ({ ...current, breakMinutes: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <button type="button" onClick={saveEditedEntry} disabled={isUpdatingEntry} className="sumo-dark-button rounded-2xl px-4 py-2 text-sm font-semibold transition disabled:opacity-60">
+                              {isUpdatingEntry ? 'Opslaan...' : 'Opslaan'}
+                            </button>
+                            <button type="button" onClick={cancelEditingEntry} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                              Annuleren
+                            </button>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-semibold text-[#8c6a2f]">{row.totalHours.toFixed(2)} uur</p>
-                          <p className="text-xs text-stone-500">Pauze {row.breakMinutes} min</p>
+                      ) : (
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="font-medium text-stone-900">{row.employeeName}</p>
+                            <p className="mt-1 text-sm text-stone-500">{row.workDate} · {row.startTime} - {row.endTime}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold text-[#8c6a2f]">{row.totalHours.toFixed(2)} uur</p>
+                            <p className="text-xs text-stone-500">Pauze {row.breakMinutes} min</p>
+                            <div className="mt-3 flex flex-wrap justify-end gap-2">
+                              <button type="button" onClick={() => startEditingEntry(row)} className="sumo-ghost-button rounded-2xl px-3 py-2 text-xs font-semibold transition">
+                                Bewerken
+                              </button>
+                              <button type="button" onClick={() => removeEntry(row.id)} className="sumo-light-button rounded-2xl px-3 py-2 text-xs font-semibold transition">
+                                Verwijderen
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   ))
                 ) : (

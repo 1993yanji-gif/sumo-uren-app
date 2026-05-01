@@ -212,6 +212,40 @@ export async function createTimeEntry(input: {
   return totalHours
 }
 
+export async function updateTimeEntry(input: {
+  id: number
+  date: string
+  startTime: string
+  endTime: string
+  breakMinutes: number
+}) {
+  const [startHour, startMinute] = input.startTime.split(':').map(Number)
+  const [endHour, endMinute] = input.endTime.split(':').map(Number)
+  const startTotal = startHour * 60 + startMinute
+  const endTotal = endHour * 60 + endMinute
+  const totalHours = Math.max(endTotal - startTotal - input.breakMinutes, 0) / 60
+
+  const { error } = await supabase
+    .from('time_entries')
+    .update({
+      work_date: input.date,
+      start_time: input.startTime,
+      end_time: input.endTime,
+      break_minutes: input.breakMinutes,
+      total_hours: totalHours,
+    })
+    .eq('id', input.id)
+
+  if (error) throw error
+
+  return totalHours
+}
+
+export async function deleteTimeEntry(id: number) {
+  const { error } = await supabase.from('time_entries').delete().eq('id', id)
+  if (error) throw error
+}
+
 export async function getEmployeeMonthlyEntries(employeeId: string, month: string): Promise<TimeEntry[]> {
   const monthStart = `${month}-01`
   const monthEnd = `${month}-31`
