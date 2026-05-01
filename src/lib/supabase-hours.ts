@@ -1,8 +1,9 @@
 import { supabase } from '@/lib/supabase'
-import type { EmployeeRecord } from '@/lib/hours-data'
+import type { EmployeeRecord, EmployeeSummary } from '@/lib/hours-data'
 
 export type TimeEntry = {
   id: number
+  employeeId?: string
   employeeName: string
   workDate: string
   startTime: string
@@ -18,10 +19,12 @@ type EmployeeRow = {
   last_name: string
   display_name: string
   pin: string
+  is_active?: boolean | null
 }
 
 type TimeEntryRow = {
   id: number
+  employee_id?: string
   work_date: string
   start_time: string
   end_time: string
@@ -45,21 +48,48 @@ const slugifyEmployeeId = (firstName: string, lastName: string) =>
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
 
-export async function getEmployees(): Promise<EmployeeRecord[]> {
-  const { data, error } = await supabase
-    .from('employees')
-    .select('id, first_name, last_name, display_name, pin')
-    .order('display_name', { ascending: true })
-
-  if (error) throw error
-
-  return ((data || []) as EmployeeRow[]).map((employee) => ({
+function mapEmployee(employee: EmployeeRow): EmployeeRecord {
+  return {
     id: employee.id,
     firstName: employee.first_name,
     lastName: employee.last_name,
     name: employee.display_name,
     pin: employee.pin,
-  })) as EmployeeRecord[]
+    isActive: employee.is_active ?? true,
+  }
+}
+
+function mapEntry(entry: TimeEntryRow): TimeEntry {
+  return {
+    id: entry.id,
+    employeeId: entry.employee_id,
+    employeeName: Array.isArray(entry.employees)
+      ? entry.employees[0]?.display_name || 'Onbekend'
+      : entry.employees?.display_name || 'Onbekend',
+    workDate: entry.work_date,
+    startTime: entry.start_time,
+    endTime: entry.end_time,
+    breakMinutes: entry.break_minutes,
+    totalHours: entry.total_hours,
+    note: entry.note || '',
+  }
+}
+
+export async function getEmployees(options?: { includeInactive?: boolean }): Promise<EmployeeRecord[]> {
+  let query = supabase
+    .from('employees')
+    .select('id, first_name, last_name, display_name, pin, is_active')
+    .order('display_name', { ascending: true })
+
+  if (!options?.includeInactive) {
+    query = query.or('is_active.is.null,is_active.eq.true')
+  }
+
+  const { data, error } = await query
+
+  if (error) throw error
+
+  return ((data || []) as EmployeeRow[]).map(mapEmployee)
 }
 
 export async function createEmployee(firstName: string, lastName: string, pin: string) {
@@ -84,18 +114,14 @@ export async function createEmployee(firstName: string, lastName: string, pin: s
       last_name: lastName.trim(),
       display_name: displayName,
       pin,
+      is_active: true,
     })
-    .select('id, first_name, last_name, display_name, pin')
+    .select('id, first_name, last_name, display_name, pin, is_active')
     .single()
 
   if (error) throw error
 
-  return {
-    id: data.id,
-    firstName: data.first_name,
-    lastName: data.last_name,
-    name: data.display_name,
-  }
+  return mapEmployee(data as EmployeeRow)
 }
 
 export async function updateEmployeePin(employeeId: string, pin: string) {
@@ -118,16 +144,34 @@ export async function updateEmployeePin(employeeId: string, pin: string) {
   }
 }
 
+export async function setEmployeeActiveStatus(employeeId: string, isActive: boolean) {
+  const { data, error } = await supabase
+    .from('employees')
+    .update({ is_active: isActive })
+    .eq('id', employeeId)
+    .select('id, display_name, is_active')
+    .single()
+
+  if (error) throw error
+
+  return {
+    id: data.id,
+    name: data.display_name,
+    isActive: data.is_active,
+  }
+}
+
 export async function loginEmployee(employeeId: string, pin: string) {
   const { data, error } = await supabase
     .from('employees')
-    .select('id, pin')
+    .select('id, pin, is_active')
     .eq('id', employeeId)
     .maybeSingle()
 
   if (error) throw error
   if (!data) throw new Error('Medewerker niet gevonden.')
-  if (data.pin !== pin) throw new Error('Onjuiste pincode.')
+  if (data.is_active === false) throw new Error('Deze medewerker staat inactief.')
+  if (data.pin !== pin) throw new Error('Pincode klopt niet.')
 
   return true
 }
@@ -135,24 +179,13 @@ export async function loginEmployee(employeeId: string, pin: string) {
 export async function getTimeEntries(): Promise<TimeEntry[]> {
   const { data, error } = await supabase
     .from('time_entries')
-    .select('id, work_date, start_time, end_time, break_minutes, total_hours, note, employees(display_name)')
+    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours, note, employees(display_name)')
     .order('work_date', { ascending: false })
     .order('id', { ascending: false })
 
   if (error) throw error
 
-  return ((data || []) as TimeEntryRow[]).map((entry) => ({
-    id: entry.id,
-    employeeName: Array.isArray(entry.employees)
-      ? entry.employees[0]?.display_name || 'Onbekend'
-      : entry.employees?.display_name || 'Onbekend',
-    workDate: entry.work_date,
-    startTime: entry.start_time,
-    endTime: entry.end_time,
-    breakMinutes: entry.break_minutes,
-    totalHours: entry.total_hours,
-    note: entry.note || '',
-  }))
+  return ((data || []) as TimeEntryRow[]).map(mapEntry)
 }
 
 export async function createTimeEntry(input: {
@@ -189,7 +222,7 @@ export async function getEmployeeMonthlyEntries(employeeId: string, month: strin
 
   const { data, error } = await supabase
     .from('time_entries')
-    .select('id, work_date, start_time, end_time, break_minutes, total_hours, note, employees(display_name)')
+    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours, note, employees(display_name)')
     .eq('employee_id', employeeId)
     .gte('work_date', monthStart)
     .lte('work_date', monthEnd)
@@ -198,16 +231,25 @@ export async function getEmployeeMonthlyEntries(employeeId: string, month: strin
 
   if (error) throw error
 
-  return ((data || []) as TimeEntryRow[]).map((entry) => ({
-    id: entry.id,
-    employeeName: Array.isArray(entry.employees)
-      ? entry.employees[0]?.display_name || 'Onbekend'
-      : entry.employees?.display_name || 'Onbekend',
-    workDate: entry.work_date,
-    startTime: entry.start_time,
-    endTime: entry.end_time,
-    breakMinutes: entry.break_minutes,
-    totalHours: entry.total_hours,
-    note: entry.note || '',
-  }))
+  return ((data || []) as TimeEntryRow[]).map(mapEntry)
+}
+
+export function summarizeEmployeeEntries(entries: TimeEntry[], employees: EmployeeRecord[]): EmployeeSummary[] {
+  return employees.map((employee) => {
+    const employeeEntries = entries.filter((entry) => entry.employeeId === employee.id)
+    const totalHours = employeeEntries.reduce((sum, entry) => sum + entry.totalHours, 0)
+    const lastWorkedDate = employeeEntries.length
+      ? employeeEntries
+          .map((entry) => entry.workDate)
+          .sort((a, b) => (a < b ? 1 : -1))[0]
+      : null
+
+    return {
+      employeeId: employee.id,
+      employeeName: employee.name,
+      totalHours,
+      entryCount: employeeEntries.length,
+      lastWorkedDate,
+    }
+  })
 }

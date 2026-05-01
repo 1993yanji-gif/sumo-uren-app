@@ -1,10 +1,12 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
 import { getEmployees, loginEmployee } from '@/lib/supabase-hours'
+
+const LAST_EMPLOYEE_KEY = 'sumo-uren-last-employee'
 
 export default function Home() {
   const router = useRouter()
@@ -13,12 +15,22 @@ export default function Home() {
   const [employeePin, setEmployeePin] = useState('')
   const [loginError, setLoginError] = useState('')
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true)
+  const [showPin, setShowPin] = useState(false)
 
   useEffect(() => {
     const loadEmployees = async () => {
       try {
         const data = await getEmployees()
-        if (data.length) setEmployees(data)
+        if (data.length) {
+          setEmployees(data)
+
+          if (typeof window !== 'undefined') {
+            const rememberedEmployee = window.localStorage.getItem(LAST_EMPLOYEE_KEY) || ''
+            if (rememberedEmployee && data.some((employee) => employee.id === rememberedEmployee)) {
+              setSelectedEmployee(rememberedEmployee)
+            }
+          }
+        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -28,6 +40,10 @@ export default function Home() {
 
     loadEmployees()
   }, [])
+
+  const isLoginValid = useMemo(() => {
+    return Boolean(selectedEmployee) && /^\d{4}$/.test(employeePin)
+  }, [selectedEmployee, employeePin])
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -45,6 +61,9 @@ export default function Home() {
     try {
       await loginEmployee(selectedEmployee, employeePin)
       setLoginError('')
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LAST_EMPLOYEE_KEY, selectedEmployee)
+      }
       router.push(`/uren?employee=${selectedEmployee}`)
     } catch (error) {
       console.error(error)
@@ -92,20 +111,30 @@ export default function Home() {
               ))}
             </select>
 
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={4}
-              value={employeePin}
-              onChange={(event) => setEmployeePin(event.target.value)}
-              placeholder="Pincode"
-              className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
-            />
+            <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
+              <input
+                type={showPin ? 'text' : 'password'}
+                inputMode="numeric"
+                maxLength={4}
+                value={employeePin}
+                onChange={(event) => setEmployeePin(event.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="Pincode"
+                className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPin((current) => !current)}
+                className="sumo-ghost-button rounded-2xl px-4 py-3 text-sm font-semibold transition"
+              >
+                {showPin ? 'Verberg pin' : 'Toon pin'}
+              </button>
+            </div>
 
             <div className="grid gap-3 md:grid-cols-3">
               <button
                 type="submit"
-                className="sumo-dark-button rounded-2xl px-5 py-3 text-base font-semibold transition"
+                disabled={!isLoginValid}
+                className="sumo-dark-button rounded-2xl px-5 py-3 text-base font-semibold transition disabled:opacity-50"
               >
                 Verder naar uren
               </button>

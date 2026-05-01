@@ -6,6 +6,7 @@ import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
 import { createTimeEntry, getEmployeeMonthlyEntries, getEmployees, type TimeEntry } from '@/lib/supabase-hours'
 
 const today = new Date().toISOString().split('T')[0]
+
 function getMonthKey(dateValue: string) {
   return dateValue.slice(0, 7)
 }
@@ -14,17 +15,81 @@ function isValidTime(value: string) {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value)
 }
 
-function calculateHours(start: string, end: string, breakMinutes: number) {
-  if (!isValidTime(start) || !isValidTime(end)) return 0
+function toMinutes(value: string) {
+  const [hour, minute] = value.split(':').map(Number)
+  return hour * 60 + minute
+}
 
-  const [startHour, startMinute] = start.split(':').map(Number)
-  const [endHour, endMinute] = end.split(':').map(Number)
+function getValidation(start: string, end: string, breakMinutes: number) {
+  if (!isValidTime(start) || !isValidTime(end)) {
+    return {
+      isValid: false,
+      fieldErrors: {
+        startTime: !isValidTime(start) ? 'Vul een geldige begintijd in.' : '',
+        endTime: !isValidTime(end) ? 'Vul een geldige eindtijd in.' : '',
+        breakMinutes: '',
+      },
+      warning: '',
+      totalHours: 0,
+    }
+  }
 
-  const startTotal = startHour * 60 + startMinute
-  const endTotal = endHour * 60 + endMinute
-  const workedMinutes = Math.max(endTotal - startTotal - breakMinutes, 0)
+  const startTotal = toMinutes(start)
+  const endTotal = toMinutes(end)
+  const shiftMinutes = endTotal - startTotal
 
-  return workedMinutes / 60
+  if (shiftMinutes <= 0) {
+    return {
+      isValid: false,
+      fieldErrors: {
+        startTime: '',
+        endTime: 'Eindtijd moet later zijn dan begintijd.',
+        breakMinutes: '',
+      },
+      warning: '',
+      totalHours: 0,
+    }
+  }
+
+  if (breakMinutes < 0) {
+    return {
+      isValid: false,
+      fieldErrors: {
+        startTime: '',
+        endTime: '',
+        breakMinutes: 'Pauze mag niet negatief zijn.',
+      },
+      warning: '',
+      totalHours: 0,
+    }
+  }
+
+  if (breakMinutes >= shiftMinutes) {
+    return {
+      isValid: false,
+      fieldErrors: {
+        startTime: '',
+        endTime: '',
+        breakMinutes: 'Pauze mag niet groter zijn dan de dienstduur.',
+      },
+      warning: '',
+      totalHours: 0,
+    }
+  }
+
+  const totalHours = (shiftMinutes - breakMinutes) / 60
+  const warning = totalHours > 12 ? 'Let op: dit is een extreem lange shift.' : totalHours > 10 ? 'Let op: controleer of deze lange shift klopt.' : ''
+
+  return {
+    isValid: true,
+    fieldErrors: {
+      startTime: '',
+      endTime: '',
+      breakMinutes: '',
+    },
+    warning,
+    totalHours,
+  }
 }
 
 function formatWorkDate(value: string) {
@@ -91,8 +156,8 @@ export default function UrenPage() {
     loadMonthlyEntries()
   }, [employeeId, date])
 
-  const totalHours = useMemo(() => {
-    return calculateHours(startTime, endTime, Number(breakMinutes) || 0)
+  const validation = useMemo(() => {
+    return getValidation(startTime, endTime, Number(breakMinutes) || 0)
   }, [startTime, endTime, breakMinutes])
 
   const monthlyTotalHours = useMemo(() => {
@@ -109,8 +174,8 @@ export default function UrenPage() {
       return
     }
 
-    if (!isValidTime(startTime) || !isValidTime(endTime)) {
-      setSaveError('Vul begintijd en eindtijd in als HH:MM, bijvoorbeeld 11:30.')
+    if (!validation.isValid) {
+      setSaveError('Controleer de ingevulde tijden en pauze.')
       return
     }
 
@@ -143,10 +208,7 @@ export default function UrenPage() {
       <div className="mx-auto max-w-5xl rounded-[2rem] sumo-card border-[rgba(97,74,42,0.16)] bg-[rgba(255,251,244,0.9)] p-6 shadow-[0_24px_70px_rgba(86,63,34,0.16)] md:p-10">
         <div className="mb-8 rounded-[1.75rem] border border-[rgba(182,144,77,0.16)] bg-[rgba(255,252,247,0.88)] px-5 py-6 shadow-[0_12px_30px_rgba(86,63,34,0.06)] md:px-7">
           <div className="mb-4 flex justify-end">
-            <Link
-              href="/"
-              className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition"
-            >
+            <Link href="/" className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
               Naar home
             </Link>
           </div>
@@ -199,6 +261,19 @@ export default function UrenPage() {
                     onChange={(e) => setBreakMinutes(e.target.value)}
                     className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                   />
+                  {validation.fieldErrors.breakMinutes ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.breakMinutes}</p> : null}
+                  <div className="mt-3 flex gap-2">
+                    {[15, 30].map((minutes) => (
+                      <button
+                        key={minutes}
+                        type="button"
+                        onClick={() => setBreakMinutes(String(minutes))}
+                        className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition"
+                      >
+                        {minutes} min
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -207,54 +282,44 @@ export default function UrenPage() {
                   <label className="mb-2 block text-sm font-medium text-stone-700">Begintijd</label>
                   <input
                     required
-                    type="text"
-                    inputMode="numeric"
+                    type="time"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    placeholder="11:30"
                     className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                   />
+                  {validation.fieldErrors.startTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.startTime}</p> : null}
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-stone-700">Eindtijd</label>
                   <input
                     required
-                    type="text"
-                    inputMode="numeric"
+                    type="time"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    placeholder="22:00"
                     className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
                   />
+                  {validation.fieldErrors.endTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.endTime}</p> : null}
                 </div>
               </div>
 
               <div className="sumo-soft-panel rounded-2xl p-5">
                 <p className="sumo-soft-panel-title text-sm uppercase tracking-[0.25em]">Totaal gewerkte uren</p>
-                <p className="mt-2 text-4xl font-semibold text-stone-900">{totalHours.toFixed(2)} uur</p>
+                <p className="mt-2 text-4xl font-semibold text-stone-900">{validation.totalHours.toFixed(2)} uur</p>
                 <p className="sumo-soft-panel-text mt-2 text-sm">Begintijd - eindtijd - pauze = totaal aantal uren</p>
+                {validation.warning ? <p className="mt-3 text-sm font-medium text-amber-700">{validation.warning}</p> : null}
               </div>
 
               <button
                 type="submit"
-                disabled={isSaving}
+                disabled={isSaving || !employeeId || !validation.isValid}
                 className="sumo-dark-button w-full rounded-2xl px-5 py-3 text-base font-semibold transition disabled:opacity-60"
               >
                 {isSaving ? 'Bezig met opslaan...' : 'Uren opslaan'}
               </button>
             </form>
 
-            {saveMessage ? (
-              <div className="sumo-success mt-5 rounded-2xl p-4 text-sm">
-                {saveMessage}
-              </div>
-            ) : null}
-
-            {saveError ? (
-              <div className="sumo-danger mt-5 rounded-2xl p-4 text-sm">
-                {saveError}
-              </div>
-            ) : null}
+            {saveMessage ? <div className="sumo-success mt-5 rounded-2xl p-4 text-sm">{saveMessage}</div> : null}
+            {saveError ? <div className="sumo-danger mt-5 rounded-2xl p-4 text-sm">{saveError}</div> : null}
           </section>
 
           <aside className="sumo-panel rounded-[1.75rem] p-5 md:p-6">
@@ -271,9 +336,7 @@ export default function UrenPage() {
 
             <div className="mt-5 space-y-3">
               {isLoadingMonthlyEntries ? (
-                <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">
-                  Uren laden...
-                </div>
+                <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Uren laden...</div>
               ) : monthlyEntries.length ? (
                 monthlyEntries.map((entry) => (
                   <div key={entry.id} className="sumo-paper-card rounded-2xl px-4 py-4">
@@ -289,9 +352,7 @@ export default function UrenPage() {
                   </div>
                 ))
               ) : (
-                <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">
-                  Nog geen uren deze maand.
-                </div>
+                <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Nog geen uren deze maand.</div>
               )}
             </div>
           </aside>
