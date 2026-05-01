@@ -56,6 +56,14 @@ export default function Home() {
     <main className="sumo-shell min-h-screen px-4 py-10 text-stone-900 md:px-6 md:py-14">
       <div className="mx-auto max-w-5xl rounded-[2rem] sumo-card border-[rgba(97,74,42,0.16)] bg-[rgba(255,251,244,0.9)] p-6 shadow-[0_24px_70px_rgba(86,63,34,0.16)] md:p-10">
         <div className="mb-10 max-w-3xl rounded-[1.75rem] border border-[rgba(182,144,77,0.16)] bg-[rgba(255,252,247,0.88)] px-5 py-6 shadow-[0_12px_30px_rgba(86,63,34,0.06)] md:px-7">
+          <div className="mb-4 flex justify-end">
+            <Link
+              href="/"
+              className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition"
+            >
+              Naar home
+            </Link>
+          </div>
           <p className="sumo-label mb-3 text-[0.7rem] text-[#8f714d]">SUMO Sushi Rotterdam Markthal</p>
           <div className="mb-5 h-[2px] w-20 rounded-full bg-gradient-to-r from-[#9f7d49] via-[#ccb184] to-transparent" />
           <h1 className="font-display text-4xl font-semibold leading-none text-[#2f2418] md:text-6xl">Welkom terug</h1>
