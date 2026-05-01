@@ -14,6 +14,7 @@ export default function Home() {
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [employeePin, setEmployeePin] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [employeeSearch, setEmployeeSearch] = useState('')
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true)
 
   useEffect(() => {
@@ -40,6 +41,12 @@ export default function Home() {
 
     loadEmployees()
   }, [])
+
+  const filteredEmployees = useMemo(() => {
+    const query = employeeSearch.trim().toLowerCase()
+    if (!query) return employees
+    return employees.filter((employee) => employee.name.toLowerCase().includes(query))
+  }, [employees, employeeSearch])
 
   const isLoginValid = useMemo(() => {
     return Boolean(selectedEmployee) && /^\d{4}$/.test(employeePin)
@@ -97,29 +104,55 @@ export default function Home() {
           <p className="sumo-muted mt-3 text-sm">Kies je naam en vul je 4-cijferige pincode in om je uren te registreren.</p>
 
           <form className="mt-6 space-y-4" onSubmit={handleLogin}>
-            <select
-              value={selectedEmployee}
-              onChange={(event) => setSelectedEmployee(event.target.value)}
-              disabled={isLoadingEmployees}
-              className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
-            >
-              <option value="">{isLoadingEmployees ? 'Medewerkers laden...' : 'Kies medewerker'}</option>
-              {employees.map((employee) => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.name}
-                </option>
-              ))}
-            </select>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={employeeSearch}
+                onChange={(event) => setEmployeeSearch(event.target.value)}
+                placeholder={isLoadingEmployees ? 'Medewerkers laden...' : 'Zoek medewerker'}
+                className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
+              />
 
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={4}
-              value={employeePin}
-              onChange={(event) => setEmployeePin(event.target.value.replace(/\D/g, '').slice(0, 4))}
-              placeholder="Pincode"
-              className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
-            />
+              <div className="grid gap-3 md:grid-cols-2">
+                {filteredEmployees.map((employee) => {
+                  const isSelected = selectedEmployee === employee.id
+                  return (
+                    <button
+                      key={employee.id}
+                      type="button"
+                      onClick={() => setSelectedEmployee(employee.id)}
+                      className={`rounded-2xl border px-4 py-4 text-left transition ${isSelected ? 'border-[#8c6a2f] bg-[rgba(193,157,91,0.16)] shadow-[0_10px_24px_rgba(140,106,47,0.14)]' : 'border-[rgba(97,74,42,0.10)] bg-[rgba(255,252,247,0.86)] hover:border-[rgba(140,106,47,0.35)] hover:bg-[rgba(255,248,236,0.95)]'}`}
+                    >
+                      <p className="text-base font-semibold text-stone-900">{employee.name}</p>
+                      <p className="mt-1 text-sm text-stone-500">Tik om te selecteren</p>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {!isLoadingEmployees && !filteredEmployees.length ? (
+                <div className="sumo-danger rounded-2xl px-4 py-3 text-sm">
+                  Geen medewerker gevonden.
+                </div>
+              ) : null}
+            </div>
+
+            {selectedEmployee ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-stone-700">
+                  Gekozen medewerker: {employees.find((employee) => employee.id === selectedEmployee)?.name || 'Medewerker'}
+                </p>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={employeePin}
+                  onChange={(event) => setEmployeePin(event.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="Pincode"
+                  className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
+                />
+              </div>
+            ) : null}
 
             <div className="space-y-3">
               <button
