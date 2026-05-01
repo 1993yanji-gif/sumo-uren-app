@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
-import { createTimeEntry, getEmployeeMonthlyEntries, getEmployees, type TimeEntry } from '@/lib/supabase-hours'
+import { createTimeEntry, getEmployeeMonthlyEntries, getEmployees, type TimeEntry } from '@/lib/cloudflare-hours'
 
 const today = new Date().toISOString().split('T')[0]
 function getMonthKey(dateValue: string) {

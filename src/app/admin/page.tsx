@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { type EmployeeRecord } from '@/lib/hours-data'
-import { createEmployee, getEmployees, getTimeEntries, type TimeEntry } from '@/lib/supabase-hours'
+import { createEmployee, getEmployees, getTimeEntries, updateEmployeePin, type TimeEntry } from '@/lib/cloudflare-hours'
 
 const DEFAULT_ADMIN_PIN = '2580'
 const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
@@ -14,11 +14,13 @@ export default function AdminPage() {
   const [lastName, setLastName] = useState('')
   const [pin, setPin] = useState('')
   const [message, setMessage] = useState('')
+  const [resetPinValues, setResetPinValues] = useState<Record<string, string>>({})
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState('')
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingEmployee, setIsSavingEmployee] = useState(false)
+  const [isUpdatingPinFor, setIsUpdatingPinFor] = useState<string | null>(null)
 
   const adminPin = process.env.NEXT_PUBLIC_ADMIN_PIN || DEFAULT_ADMIN_PIN
   const totalHours = useMemo(() => entries.reduce((sum, row) => sum + row.totalHours, 0), [entries])
@@ -100,6 +102,40 @@ export default function AdminPage() {
     const employee = employees.find((item) => item.id === employeeId)
     setEmployees((current) => current.filter((item) => item.id !== employeeId))
     setMessage(employee ? `${employee.name} is lokaal uit dit overzicht verwijderd. Database-verwijderen bouwen we hierna.` : 'Medewerker verwijderd.')
+  }
+
+  const handlePinValueChange = (employeeId: string, value: string) => {
+    setResetPinValues((current) => ({
+      ...current,
+      [employeeId]: value,
+    }))
+  }
+
+  const handleUpdatePin = async (employeeId: string) => {
+    const newPin = (resetPinValues[employeeId] || '').trim()
+    const employee = employees.find((item) => item.id === employeeId)
+
+    if (!/^\d{4}$/.test(newPin)) {
+      setMessage('Nieuwe pincode moet uit 4 cijfers bestaan.')
+      return
+    }
+
+    setIsUpdatingPinFor(employeeId)
+    setMessage('')
+
+    try {
+      await updateEmployeePin(employeeId, newPin)
+      setResetPinValues((current) => ({
+        ...current,
+        [employeeId]: '',
+      }))
+      setMessage(employee ? `Pincode van ${employee.name} is bijgewerkt.` : 'Pincode is bijgewerkt.')
+    } catch (error) {
+      console.error(error)
+      setMessage(error instanceof Error ? error.message : 'Er ging iets mis bij het wijzigen van de pincode.')
+    } finally {
+      setIsUpdatingPinFor(null)
+    }
   }
 
   if (!isUnlocked) {
@@ -253,19 +289,41 @@ export default function AdminPage() {
               {employees.map((employee) => (
                 <div
                   key={employee.id}
-                  className="sumo-panel flex items-center justify-between rounded-2xl px-4 py-3"
+                  className="sumo-panel rounded-2xl px-4 py-4"
                 >
-                  <div>
-                    <p className="font-medium text-stone-900">{employee.name}</p>
-                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">ID: {employee.id}</p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-medium text-stone-900">{employee.name}</p>
+                      <p className="text-xs uppercase tracking-[0.18em] text-stone-500">ID: {employee.id}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEmployee(employee.id)}
+                      className="rounded-xl border border-[rgba(161,68,68,0.24)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8c3737] transition hover:bg-[rgba(161,68,68,0.08)]"
+                    >
+                      Verwijderen
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveEmployee(employee.id)}
-                    className="rounded-xl border border-[rgba(161,68,68,0.24)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8c3737] transition hover:bg-[rgba(161,68,68,0.08)]"
-                  >
-                    Verwijderen
-                  </button>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={resetPinValues[employee.id] || ''}
+                      onChange={(event) => handlePinValueChange(employee.id, event.target.value)}
+                      placeholder="Nieuwe pincode (4 cijfers)"
+                      className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleUpdatePin(employee.id)}
+                      disabled={isUpdatingPinFor === employee.id}
+                      className="sumo-dark-button rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:opacity-60"
+                    >
+                      {isUpdatingPinFor === employee.id ? 'Bezig...' : 'Wijzig pin'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
