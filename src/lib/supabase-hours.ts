@@ -220,9 +220,17 @@ export async function getEmployeeMonthlyEntries(employeeId: string, month: strin
   const monthStart = `${month}-01`
   const monthEnd = `${month}-31`
 
+  const employee = await supabase
+    .from('employees')
+    .select('display_name')
+    .eq('id', employeeId)
+    .maybeSingle()
+
+  if (employee.error) throw employee.error
+
   const { data, error } = await supabase
     .from('time_entries')
-    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours, note, employees(display_name)')
+    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours, note')
     .eq('employee_id', employeeId)
     .gte('work_date', monthStart)
     .lte('work_date', monthEnd)
@@ -231,7 +239,19 @@ export async function getEmployeeMonthlyEntries(employeeId: string, month: strin
 
   if (error) throw error
 
-  return ((data || []) as TimeEntryRow[]).map(mapEntry)
+  const employeeName = employee.data?.display_name || 'Onbekend'
+
+  return ((data || []) as TimeEntryRow[]).map((entry) => ({
+    id: entry.id,
+    employeeId: entry.employee_id,
+    employeeName,
+    workDate: entry.work_date,
+    startTime: entry.start_time,
+    endTime: entry.end_time,
+    breakMinutes: entry.break_minutes,
+    totalHours: entry.total_hours,
+    note: entry.note || '',
+  }))
 }
 
 export function summarizeEmployeeEntries(entries: TimeEntry[], employees: EmployeeRecord[]): EmployeeSummary[] {
