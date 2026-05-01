@@ -145,6 +145,7 @@ export default function UrenPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [monthlyEntries, setMonthlyEntries] = useState<TimeEntry[]>([])
   const [isLoadingMonthlyEntries, setIsLoadingMonthlyEntries] = useState(false)
+  const [showMonthlyDetails, setShowMonthlyDetails] = useState(false)
 
   useEffect(() => {
     const loadEmployees = async () => {
@@ -395,58 +396,70 @@ export default function UrenPage() {
           </section>
 
           <aside className="sumo-panel rounded-[1.75rem] p-5 md:p-6">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="sumo-label">Jouw uren</p>
-                <h2 className="mt-2 font-display text-3xl text-stone-900">Maandoverzicht</h2>
-                <div className="mt-3 flex items-center gap-2">
-                  <button type="button" onClick={() => setOverviewMonth((current) => shiftMonth(current, -1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
-                    Vorige
-                  </button>
-                  <div className="rounded-2xl border border-[rgba(97,74,42,0.12)] bg-[rgba(255,251,244,0.74)] px-4 py-2 text-sm font-semibold text-stone-900">
-                    {formatMonthLabel(overviewMonth)}
-                  </div>
-                  <button type="button" onClick={() => setOverviewMonth((current) => shiftMonth(current, 1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
-                    Volgende
-                  </button>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="sumo-label">Jouw uren</p>
+                  <h2 className="mt-2 font-display text-3xl text-stone-900">Maandoverzicht</h2>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Totaal deze maand</p>
+                  <p className="text-2xl font-semibold text-stone-900">{monthlyTotalHours.toFixed(2)} uur</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Totaal maand</p>
-                <p className="text-2xl font-semibold text-stone-900">{monthlyTotalHours.toFixed(2)} uur</p>
+
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setOverviewMonth((current) => shiftMonth(current, -1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                  Vorige
+                </button>
+                <div className="rounded-2xl border border-[rgba(97,74,42,0.12)] bg-[rgba(255,251,244,0.74)] px-4 py-2 text-sm font-semibold text-stone-900">
+                  {formatMonthLabel(overviewMonth)}
+                </div>
+                <button type="button" onClick={() => setOverviewMonth((current) => shiftMonth(current, 1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                  Volgende
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => setShowMonthlyDetails((current) => !current)} className="sumo-light-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                  {showMonthlyDetails ? 'Verberg details' : 'Toon details'}
+                </button>
+                <button type="button" onClick={() => handleEmployeeExport('excel')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                  Excel
+                </button>
+                <button type="button" onClick={() => handleEmployeeExport('pdf')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                  PDF
+                </button>
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              <button type="button" onClick={() => handleEmployeeExport('excel')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
-                Exporteer Excel
-              </button>
-              <button type="button" onClick={() => handleEmployeeExport('pdf')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
-                Exporteer PDF
-              </button>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {isLoadingMonthlyEntries ? (
-                <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Uren laden...</div>
-              ) : monthlyEntries.length ? (
-                monthlyEntries.map((entry) => (
-                  <div key={entry.id} className="sumo-paper-card rounded-2xl px-4 py-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="font-medium text-stone-900">{formatWorkDate(entry.workDate)}</p>
-                        <p className="mt-1 text-sm text-stone-500">
-                          {entry.startTime} - {entry.endTime} · Pauze {entry.breakMinutes} min
-                        </p>
+            {showMonthlyDetails ? (
+              <div className="mt-5 space-y-3">
+                {isLoadingMonthlyEntries ? (
+                  <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Uren laden...</div>
+                ) : monthlyEntries.length ? (
+                  monthlyEntries.map((entry) => (
+                    <div key={entry.id} className="sumo-paper-card rounded-2xl px-4 py-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-stone-900">{formatWorkDate(entry.workDate)}</p>
+                          <p className="mt-1 text-sm text-stone-500">
+                            {entry.startTime} - {entry.endTime} · Pauze {entry.breakMinutes} min
+                          </p>
+                        </div>
+                        <p className="text-lg font-semibold text-[#8c6a2f]">{entry.totalHours.toFixed(2)} uur</p>
                       </div>
-                      <p className="text-lg font-semibold text-[#8c6a2f]">{entry.totalHours.toFixed(2)} uur</p>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Nog geen uren deze maand.</div>
-              )}
-            </div>
+                  ))
+                ) : (
+                  <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Nog geen uren deze maand.</div>
+                )}
+              </div>
+            ) : (
+              <div className="mt-5 rounded-2xl border border-dashed border-[rgba(97,74,42,0.14)] bg-[rgba(255,252,247,0.6)] px-4 py-4 text-sm text-stone-500">
+                Detailregels zijn verborgen zodat je focus op registreren blijft.
+              </div>
+            )}
           </aside>
         </div>
       </div>
