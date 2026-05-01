@@ -54,17 +54,17 @@ export default function Home() {
 
   return (
     <main className="sumo-shell min-h-screen px-4 py-10 text-stone-900 md:px-6 md:py-14">
-      <div className="mx-auto max-w-5xl rounded-[2rem] sumo-card p-6 backdrop-blur md:p-10">
-        <div className="mb-10 max-w-3xl">
-          <p className="sumo-label mb-3">SUMO Sushi Rotterdam Markthal</p>
-          <div className="sumo-divider mb-5" />
-          <h1 className="font-display text-4xl text-stone-900 md:text-6xl">Welkom terug</h1>
-          <p className="sumo-muted mt-4 text-base leading-relaxed md:text-lg">
+      <div className="mx-auto max-w-5xl rounded-[2rem] sumo-card border-[rgba(97,74,42,0.16)] bg-[rgba(255,251,244,0.9)] p-6 shadow-[0_24px_70px_rgba(86,63,34,0.16)] md:p-10">
+        <div className="mb-10 max-w-3xl rounded-[1.75rem] border border-[rgba(182,144,77,0.16)] bg-[rgba(255,252,247,0.88)] px-5 py-6 shadow-[0_12px_30px_rgba(86,63,34,0.06)] md:px-7">
+          <p className="sumo-label mb-3 text-[0.7rem] text-[#8f714d]">SUMO Sushi Rotterdam Markthal</p>
+          <div className="mb-5 h-[2px] w-20 rounded-full bg-gradient-to-r from-[#9f7d49] via-[#ccb184] to-transparent" />
+          <h1 className="font-display text-4xl font-semibold leading-none text-[#2f2418] md:text-6xl">Welkom terug</h1>
+          <p className="mt-4 text-base leading-relaxed text-[#4f4031] md:text-lg">
             Kies je naam, vul je pincode in en ga direct door naar je urenregistratie. Nieuwe medewerker? Maak hieronder eerst een nieuw account aan.
           </p>
         </div>
 
-        <div className="sumo-paper-card rounded-3xl p-6">
+        <div className="sumo-paper-card rounded-[1.75rem] p-6 md:p-8">
           <p className="sumo-label">Inloggen medewerker</p>
           <h2 className="mt-2 font-display text-3xl text-stone-900">Selecteer medewerker</h2>
           <p className="sumo-muted mt-3 text-sm">Kies je naam en vul je 4-cijferige pincode in om je uren te registreren.</p>
@@ -74,7 +74,7 @@ export default function Home() {
               value={selectedEmployee}
               onChange={(event) => setSelectedEmployee(event.target.value)}
               disabled={isLoadingEmployees}
-              className="w-full rounded-2xl border border-stone-300 bg-white/70 px-4 py-3 text-stone-900 outline-none transition focus:border-[#8d744e]"
+              className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
             >
               <option value="">{isLoadingEmployees ? 'Medewerkers laden...' : 'Kies medewerker'}</option>
               {employees.map((employee) => (
@@ -91,7 +91,7 @@ export default function Home() {
               value={employeePin}
               onChange={(event) => setEmployeePin(event.target.value)}
               placeholder="Pincode"
-              className="w-full rounded-2xl border border-stone-300 bg-white/70 px-4 py-3 text-stone-900 outline-none transition focus:border-[#8d744e]"
+              className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
             />
 
             <div className="grid gap-3 md:grid-cols-3">
@@ -111,7 +111,7 @@ export default function Home() {
 
               <Link
                 href="/admin"
-                className="rounded-2xl border border-stone-300 bg-white/55 px-5 py-3 text-center text-base font-semibold text-stone-800 transition hover:bg-white/75"
+                className="sumo-ghost-button rounded-2xl px-5 py-3 text-center text-base font-semibold transition"
               >
                 Admin
               </Link>
@@ -119,7 +119,7 @@ export default function Home() {
           </form>
 
           {loginError ? (
-            <div className="mt-4 rounded-2xl border border-red-300/70 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="sumo-danger mt-4 rounded-2xl px-4 py-3 text-sm">
               {loginError}
             </div>
           ) : null}
