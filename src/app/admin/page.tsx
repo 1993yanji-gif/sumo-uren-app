@@ -20,6 +20,20 @@ const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
 type DateFilter = 'today' | 'week' | 'month' | 'all'
 type SortOption = 'recent' | 'hours'
 
+const currentMonthKey = new Date().toISOString().slice(0, 7)
+
+function shiftMonth(monthKey: string, diff: number) {
+  const [year, month] = monthKey.split('-').map(Number)
+  const date = new Date(year, month - 1 + diff, 1)
+  const shiftedYear = date.getFullYear()
+  const shiftedMonth = String(date.getMonth() + 1).padStart(2, '0')
+  return `${shiftedYear}-${shiftedMonth}`
+}
+
+function isInSpecificMonth(value: string, monthKey: string) {
+  return value.slice(0, 7) === monthKey
+}
+
 function startOfWeek(date: Date) {
   const copy = new Date(date)
   const day = copy.getDay()
@@ -80,6 +94,7 @@ export default function AdminPage() {
   const [isUpdatingPinFor, setIsUpdatingPinFor] = useState<string | null>(null)
   const [isUpdatingStatusFor, setIsUpdatingStatusFor] = useState<string | null>(null)
   const [dateFilter, setDateFilter] = useState<DateFilter>('month')
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthKey)
   const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState('all')
   const [sortOption, setSortOption] = useState<SortOption>('recent')
   const [openEmployeeCards, setOpenEmployeeCards] = useState<Record<string, boolean>>({})
@@ -119,13 +134,16 @@ export default function AdminPage() {
 
   const filteredEntries = useMemo(() => {
     return entries
-      .filter((entry) => isInDateFilter(entry.workDate, dateFilter))
+      .filter((entry) => {
+        if (dateFilter === 'month') return isInSpecificMonth(entry.workDate, selectedMonth)
+        return isInDateFilter(entry.workDate, dateFilter)
+      })
       .filter((entry) => selectedEmployeeFilter === 'all' || entry.employeeId === selectedEmployeeFilter)
       .sort((a, b) => {
         if (sortOption === 'hours') return b.totalHours - a.totalHours
         return `${b.workDate}-${b.id}`.localeCompare(`${a.workDate}-${a.id}`)
       })
-  }, [entries, dateFilter, selectedEmployeeFilter, sortOption])
+  }, [entries, dateFilter, selectedEmployeeFilter, sortOption, selectedMonth])
 
   const totalHours = useMemo(() => filteredEntries.reduce((sum, row) => sum + row.totalHours, 0), [filteredEntries])
   const uniqueEmployeesWithEntries = useMemo(() => new Set(filteredEntries.map((entry) => entry.employeeName)).size, [filteredEntries])
@@ -147,9 +165,9 @@ export default function AdminPage() {
   }, [employees, searchQuery, statusFilter])
 
   const employeeSummaries = useMemo<EmployeeSummary[]>(() => {
-    const scopedEntries = entries.filter((entry) => isInDateFilter(entry.workDate, 'month'))
+    const scopedEntries = entries.filter((entry) => isInSpecificMonth(entry.workDate, selectedMonth))
     return summarizeEmployeeEntries(scopedEntries, filteredEmployees)
-  }, [entries, filteredEmployees])
+  }, [entries, filteredEmployees, selectedMonth])
 
   const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -383,12 +401,30 @@ export default function AdminPage() {
               placeholder="Zoek medewerker of ID"
               className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
             />
-            <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as DateFilter)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
-              <option value="today">Vandaag</option>
-              <option value="week">Deze week</option>
-              <option value="month">Deze maand</option>
-              <option value="all">Alles</option>
-            </select>
+            <div className="grid gap-2">
+              <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as DateFilter)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
+                <option value="today">Vandaag</option>
+                <option value="week">Deze week</option>
+                <option value="month">Deze maand</option>
+                <option value="all">Alles</option>
+              </select>
+              {dateFilter === 'month' ? (
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setSelectedMonth((current) => shiftMonth(current, -1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                    ←
+                  </button>
+                  <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(event) => setSelectedMonth(event.target.value)}
+                    className="sumo-input rounded-2xl px-4 py-3 outline-none transition"
+                  />
+                  <button type="button" onClick={() => setSelectedMonth((current) => shiftMonth(current, 1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                    →
+                  </button>
+                </div>
+              ) : null}
+            </div>
             <select value={selectedEmployeeFilter} onChange={(event) => setSelectedEmployeeFilter(event.target.value)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
               <option value="all">Alle medewerkers</option>
               {employees.map((employee) => (
