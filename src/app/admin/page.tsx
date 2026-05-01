@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { type EmployeeRecord } from '@/lib/hours-data'
 import { createEmployee, getEmployees, getTimeEntries, updateEmployeePin, type TimeEntry } from '@/lib/supabase-hours'
@@ -200,6 +201,14 @@ export default function AdminPage() {
     <main className="sumo-shell min-h-screen px-4 py-10 text-stone-900 md:px-6 md:py-14">
       <div className="mx-auto max-w-7xl rounded-[2rem] sumo-card border-[rgba(97,74,42,0.16)] bg-[rgba(255,251,244,0.9)] p-6 shadow-[0_24px_70px_rgba(86,63,34,0.16)] md:p-10">
         <div className="rounded-[1.75rem] border border-[rgba(182,144,77,0.16)] bg-[rgba(255,252,247,0.88)] px-5 py-6 shadow-[0_12px_30px_rgba(86,63,34,0.06)] md:px-7">
+          <div className="mb-4 flex justify-end">
+            <Link
+              href="/"
+              className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition"
+            >
+              Naar home
+            </Link>
+          </div>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="sumo-label mb-3 text-[0.7rem] text-[#8f714d]">Admin</p>
