@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
+import { type EmployeeRecord } from '@/lib/hours-data'
 import { createTimeEntry, getEmployeeMonthlyEntries, getEmployees, type TimeEntry } from '@/lib/supabase-hours'
 import { exportToCsv, exportToExcel, exportToPdf, mapEntriesForExport } from '@/lib/export-utils'
 
@@ -102,7 +102,7 @@ function formatWorkDate(value: string) {
 }
 
 export default function UrenPage() {
-  const [employees, setEmployees] = useState<EmployeeRecord[]>(defaultEmployees)
+  const [employees, setEmployees] = useState<EmployeeRecord[]>([])
   const [employeeId, setEmployeeId] = useState('')
   const [date, setDate] = useState(today)
   const [startTime, setStartTime] = useState('')

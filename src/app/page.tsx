@@ -3,14 +3,14 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
+import { type EmployeeRecord } from '@/lib/hours-data'
 import { getEmployees, loginEmployee } from '@/lib/supabase-hours'
 
 const LAST_EMPLOYEE_KEY = 'sumo-uren-last-employee'
 
 export default function Home() {
   const router = useRouter()
-  const [employees, setEmployees] = useState<EmployeeRecord[]>(defaultEmployees)
+  const [employees, setEmployees] = useState<EmployeeRecord[]>([])
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [employeePin, setEmployeePin] = useState('')
   const [loginError, setLoginError] = useState('')
@@ -33,6 +33,7 @@ export default function Home() {
         }
       } catch (error) {
         console.error(error)
+        setLoginError('Kon medewerkers niet laden uit Supabase.')
       } finally {
         setIsLoadingEmployees(false)
       }
