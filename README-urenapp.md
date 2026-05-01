@@ -1,10 +1,12 @@
 # Urenregistratie app
 
-Losse prototype repo voor `sumo-uren-app`.
+Losse repo voor `sumo-uren-app`.
 
 ## Pagina's
-- `/uren` → medewerker voert naam, datum, begin/eind en pauze in
-- `/admin` → demo admin-overzicht
+- `/` → login medewerker
+- `/register` → nieuwe medewerker aanmaken
+- `/uren` → uren registreren + maandoverzicht exporteren
+- `/admin` → admin dashboard met filters, medewerkersbeheer en export
 
 ## Installeren
 ```bash
@@ -13,42 +15,49 @@ npm run dev
 ```
 
 ## Huidige status
-- Homepage login + medewerker-aanmaak gekoppeld aan Cloudflare Functions
-- Medewerkers worden opgeslagen in D1
-- Uren worden opgeslagen in D1
+- Frontend draait in Next.js
+- Data loopt via **Supabase**
+- Medewerkers worden opgeslagen in Supabase tabel `employees`
+- Uren worden opgeslagen in Supabase tabel `time_entries`
 - Admin pagina vraagt eerst om een pincode
-- Admin leest medewerkers en uren uit de database
+- Login, urenregistratie en admin lezen/schrijven direct via Supabase
+- Export beschikbaar als CSV, Excel en PDF
 
-## Volgende Cloudflare stappen
-1. Nieuwe Cloudflare Pages/Workers project koppelen
-2. D1 database aanmaken met tabel `time_entries`
-3. API routes of Worker endpoints toevoegen voor opslaan/ophalen
-4. Admin pagina beveiligen met Cloudflare Access of eenvoudige login
+## Belangrijke regel
+Deze app gebruikt **altijd Supabase** voor database en data-opslag.
+
+Niet gebruiken voor deze app:
+- Cloudflare API
+- D1
+- Worker API als databron
 
 ## Admin pincode
 - Standaard pincode: `2580`
 - Later aanpasbaar via `NEXT_PUBLIC_ADMIN_PIN`
 
-## Vereiste Cloudflare binding
-- Pages frontend gebruikt straks `NEXT_PUBLIC_API_BASE_URL`
-- Aparte Worker API gebruikt D1 binding naam: `DB`
+## Verwachte Supabase structuur
+### Tabel `employees`
+Velden:
+- `id`
+- `first_name`
+- `last_name`
+- `display_name`
+- `pin`
+- `is_active`
 
-## Worker API
-- map: `worker-api/`
-- worker naam: `sumo-uren-api`
-- routes: `/api/employees`, `/api/login`, `/api/time-entries`
+### Tabel `time_entries`
+Velden:
+- `id`
+- `employee_id`
+- `work_date`
+- `start_time`
+- `end_time`
+- `break_minutes`
+- `total_hours`
+- `note`
 
-## Database
-```sql
-CREATE TABLE time_entries (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  employee_name TEXT NOT NULL,
-  work_date TEXT NOT NULL,
-  start_time TEXT NOT NULL,
-  end_time TEXT NOT NULL,
-  break_minutes INTEGER NOT NULL DEFAULT 0,
-  total_hours REAL NOT NULL,
-  note TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-```
+## Nog handig om later te bouwen
+- export per gekozen periode verfijnen
+- maandrapporten mooier opmaken
+- auditlog voor admin acties
+- betere Supabase migraties/documentatie

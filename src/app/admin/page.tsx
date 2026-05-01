@@ -12,6 +12,7 @@ import {
   updateEmployeePin,
   type TimeEntry,
 } from '@/lib/supabase-hours'
+import { exportToCsv, exportToExcel, exportToPdf, mapEntriesForExport } from '@/lib/export-utils'
 
 const DEFAULT_ADMIN_PIN = '2580'
 const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
@@ -262,6 +263,44 @@ export default function AdminPage() {
     }))
   }
 
+  const handleAdminExport = (type: 'csv' | 'excel' | 'pdf') => {
+    if (!filteredEntries.length) {
+      setMessage('Er zijn geen uren om te exporteren.')
+      return
+    }
+
+    const rows = mapEntriesForExport(filteredEntries)
+    const filterLabel = selectedEmployeeFilter === 'all'
+      ? dateFilter
+      : `${dateFilter}-${selectedEmployeeFilter}`
+    const baseFilename = `urenoverzicht-${filterLabel}`
+
+    if (type === 'csv') {
+      exportToCsv(rows, `${baseFilename}.csv`)
+      return
+    }
+
+    if (type === 'excel') {
+      exportToExcel(rows, `${baseFilename}.xlsx`)
+      return
+    }
+
+    exportToPdf(rows, `${baseFilename}.pdf`, `Urenoverzicht ${filterLabel}`)
+  }
+
+  const handleEmployeeMonthReport = (summary: EmployeeSummary) => {
+    const employeeEntries = entries.filter((entry) => entry.employeeId === summary.employeeId && isInDateFilter(entry.workDate, 'month'))
+
+    if (!employeeEntries.length) {
+      setMessage('Deze medewerker heeft geen uren deze maand.')
+      return
+    }
+
+    const rows = mapEntriesForExport(employeeEntries)
+    const safeName = summary.employeeName.toLowerCase().replace(/\s+/g, '-')
+    exportToPdf(rows, `maandrapport-${safeName}.pdf`, `Maandrapport ${summary.employeeName}`)
+  }
+
   if (!isUnlocked) {
     return (
       <main className="sumo-shell min-h-screen px-4 py-10 text-stone-900 md:px-6 md:py-14">
@@ -367,14 +406,19 @@ export default function AdminPage() {
         <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
           <section className="space-y-6">
             <div className="sumo-paper-card rounded-[1.75rem] p-5 md:p-6">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="sumo-label">Urenoverzicht</p>
                   <h2 className="font-display text-3xl text-stone-900">Laatste uren</h2>
                   <p className="sumo-muted mt-2 text-sm">Gefilterde registraties op datum en medewerker.</p>
                 </div>
-                <div className="rounded-2xl bg-[rgba(193,157,91,0.12)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#8c6a2f]">
-                  {filteredEntries.length} regels
+                <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                  <div className="rounded-2xl bg-[rgba(193,157,91,0.12)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#8c6a2f]">
+                    {filteredEntries.length} regels
+                  </div>
+                  <button type="button" onClick={() => handleAdminExport('csv')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">CSV</button>
+                  <button type="button" onClick={() => handleAdminExport('excel')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">Excel</button>
+                  <button type="button" onClick={() => handleAdminExport('pdf')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">PDF</button>
                 </div>
               </div>
 
@@ -453,9 +497,14 @@ export default function AdminPage() {
 
                         {isOpen ? (
                           <div className="mt-4 space-y-4 border-t border-[rgba(97,74,42,0.08)] pt-4">
-                            <div>
-                              <p className="text-xs uppercase tracking-[0.16em] text-stone-500">Registraties deze maand</p>
-                              <p className="mt-1 font-medium text-stone-900">{summary.entryCount}</p>
+                            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.16em] text-stone-500">Registraties deze maand</p>
+                                <p className="mt-1 font-medium text-stone-900">{summary.entryCount}</p>
+                              </div>
+                              <button type="button" onClick={() => handleEmployeeMonthReport(summary)} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                                Maandrapport PDF
+                              </button>
                             </div>
 
                             <div className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-center">

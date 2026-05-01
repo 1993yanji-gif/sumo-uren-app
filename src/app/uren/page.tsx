@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { defaultEmployees, type EmployeeRecord } from '@/lib/hours-data'
 import { createTimeEntry, getEmployeeMonthlyEntries, getEmployees, type TimeEntry } from '@/lib/supabase-hours'
+import { exportToCsv, exportToExcel, exportToPdf, mapEntriesForExport } from '@/lib/export-utils'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -163,6 +164,34 @@ export default function UrenPage() {
   const monthlyTotalHours = useMemo(() => {
     return monthlyEntries.reduce((sum, entry) => sum + entry.totalHours, 0)
   }, [monthlyEntries])
+
+  const selectedEmployeeName = useMemo(() => {
+    return employees.find((employee) => employee.id === employeeId)?.name || 'Medewerker'
+  }, [employees, employeeId])
+
+  const handleEmployeeExport = (type: 'csv' | 'excel' | 'pdf') => {
+    if (!monthlyEntries.length) {
+      setSaveError('Er zijn geen uren om te exporteren.')
+      return
+    }
+
+    const rows = mapEntriesForExport(monthlyEntries)
+    const monthKey = getMonthKey(date)
+    const safeName = selectedEmployeeName.toLowerCase().replace(/\s+/g, '-')
+    const baseFilename = `maandoverzicht-${safeName}-${monthKey}`
+
+    if (type === 'csv') {
+      exportToCsv(rows, `${baseFilename}.csv`)
+      return
+    }
+
+    if (type === 'excel') {
+      exportToExcel(rows, `${baseFilename}.xlsx`)
+      return
+    }
+
+    exportToPdf(rows, `${baseFilename}.pdf`, `Maandoverzicht ${selectedEmployeeName} · ${monthKey}`)
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -332,6 +361,18 @@ export default function UrenPage() {
                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Totaal maand</p>
                 <p className="text-2xl font-semibold text-stone-900">{monthlyTotalHours.toFixed(2)} uur</p>
               </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button type="button" onClick={() => handleEmployeeExport('csv')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                Exporteer CSV
+              </button>
+              <button type="button" onClick={() => handleEmployeeExport('excel')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                Exporteer Excel
+              </button>
+              <button type="button" onClick={() => handleEmployeeExport('pdf')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                Exporteer PDF
+              </button>
             </div>
 
             <div className="mt-5 space-y-3">
