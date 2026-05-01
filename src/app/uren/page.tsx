@@ -296,65 +296,75 @@ export default function UrenPage() {
                 {!employeeId ? <p className="mt-2 text-sm text-red-600">Geen medewerker gekozen. Ga terug naar home en log opnieuw in.</p> : null}
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-700">Datum</label>
-                  <input
-                    required
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-700">Pauze (minuten)</label>
-                  <input
-                    min="0"
-                    step="5"
-                    type="number"
-                    value={breakMinutes}
-                    onChange={(e) => setBreakMinutes(e.target.value)}
-                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
-                  />
-                  {validation.fieldErrors.breakMinutes ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.breakMinutes}</p> : null}
-                  <div className="mt-3 flex gap-2">
-                    {[15, 30].map((minutes) => (
-                      <button
-                        key={minutes}
-                        type="button"
-                        onClick={() => setBreakMinutes(String(minutes))}
-                        className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition"
-                      >
-                        {minutes} min
-                      </button>
-                    ))}
+              <div className="rounded-2xl border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.72)] px-4 py-4">
+                <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div className="md:max-w-xs">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Datum</label>
+                    <input
+                      required
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
+                    />
+                    <p className="mt-2 text-xs text-stone-500">Standaard staat deze op vandaag.</p>
+                  </div>
+
+                  <div className="flex-1">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Pauze</label>
+                    <div className="grid gap-2 sm:grid-cols-4">
+                      {[0, 15, 30, 45].map((minutes) => {
+                        const isSelected = breakMinutes === String(minutes)
+                        return (
+                          <button
+                            key={minutes}
+                            type="button"
+                            onClick={() => setBreakMinutes(String(minutes))}
+                            className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${isSelected ? 'bg-[#8c6a2f] text-white shadow-[0_10px_24px_rgba(140,106,47,0.2)]' : 'sumo-ghost-button'}`}
+                          >
+                            {minutes} min
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <div className="mt-3">
+                      <input
+                        min="0"
+                        step="5"
+                        type="number"
+                        value={breakMinutes}
+                        onChange={(e) => setBreakMinutes(e.target.value)}
+                        className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
+                        placeholder="Andere pauze in minuten"
+                      />
+                      {validation.fieldErrors.breakMinutes ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.breakMinutes}</p> : null}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-700">Begintijd</label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.88)] p-4 md:p-5">
+                  <label className="mb-3 block text-sm font-semibold text-stone-800">Begintijd</label>
                   <input
                     required
                     type="time"
                     step="60"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
+                    className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"
                   />
                   {validation.fieldErrors.startTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.startTime}</p> : null}
                 </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-stone-700">Eindtijd</label>
+                <div className="rounded-[1.5rem] border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.88)] p-4 md:p-5">
+                  <label className="mb-3 block text-sm font-semibold text-stone-800">Eindtijd</label>
                   <input
                     required
                     type="time"
                     step="60"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
+                    className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"
                   />
                   {validation.fieldErrors.endTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.endTime}</p> : null}
                 </div>
