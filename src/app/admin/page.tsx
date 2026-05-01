@@ -359,7 +359,10 @@ export default function AdminPage() {
     <main className="sumo-shell min-h-screen px-4 py-10 text-stone-900 md:px-6 md:py-14">
       <div className="mx-auto max-w-7xl rounded-[2rem] sumo-card border-[rgba(97,74,42,0.16)] bg-[rgba(255,251,244,0.9)] p-6 shadow-[0_24px_70px_rgba(86,63,34,0.16)] md:p-10">
         <div className="rounded-[1.75rem] border border-[rgba(182,144,77,0.16)] bg-[rgba(255,252,247,0.88)] px-5 py-6 shadow-[0_12px_30px_rgba(86,63,34,0.06)] md:px-7">
-          <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex justify-end gap-3">
+            <Link href="/admin/settings" className="sumo-light-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+              Instellingen
+            </Link>
             <Link href="/" className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
               Naar home
             </Link>
@@ -440,7 +443,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
+        <div className="mt-8">
           <section className="space-y-6">
             <div className="sumo-paper-card rounded-[1.75rem] p-5 md:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -586,50 +589,6 @@ export default function AdminPage() {
               </div>
             </div>
           </section>
-
-          <aside className="space-y-6">
-            <div className="sumo-paper-card rounded-[1.75rem] p-5 md:p-6">
-              <p className="sumo-label">Instellingen</p>
-              <h2 className="font-display text-3xl text-stone-900">Nieuwe medewerker</h2>
-              <p className="sumo-muted mt-2 text-sm">Voeg een medewerker toe met naam en eigen 4-cijferige pin.</p>
-
-              <form className="mt-5 space-y-3" onSubmit={handleAddEmployee}>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input type="text" value={firstName} onChange={(event) => setFirstName(event.target.value)} placeholder="Voornaam" className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition" />
-                  <input type="text" value={lastName} onChange={(event) => setLastName(event.target.value)} placeholder="Achternaam" className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition" />
-                </div>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  value={pin}
-                  onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 4))}
-                  placeholder="Pincode (4 cijfers)"
-                  className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
-                />
-                <button type="submit" disabled={isSavingEmployee} className="sumo-dark-button w-full rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:opacity-60">
-                  {isSavingEmployee ? 'Bezig met toevoegen...' : 'Medewerker toevoegen'}
-                </button>
-              </form>
-            </div>
-
-            <div className="sumo-paper-card rounded-[1.75rem] p-5 md:p-6">
-              <p className="sumo-label">Snelle status</p>
-              <h2 className="font-display text-3xl text-stone-900">Dashboard info</h2>
-              <div className="mt-4 space-y-3 text-sm text-stone-600">
-                <div className="sumo-panel rounded-2xl px-4 py-3">
-                  <span className="font-medium text-stone-900">Laatste registratie:</span>{' '}
-                  {latestEntries[0] ? `${latestEntries[0].employeeName} · ${latestEntries[0].workDate}` : 'Nog geen registraties'}
-                </div>
-                <div className="sumo-panel rounded-2xl px-4 py-3">
-                  <span className="font-medium text-stone-900">Zoekresultaten:</span> {filteredEmployees.length} medewerker(s)
-                </div>
-                <div className="sumo-panel rounded-2xl px-4 py-3">
-                  <span className="font-medium text-stone-900">Admin status:</span> Ontgrendeld
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
     </main>
