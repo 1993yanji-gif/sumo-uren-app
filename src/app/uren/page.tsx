@@ -241,7 +241,11 @@ export default function UrenPage() {
       setEndTime('')
     } catch (error) {
       console.error(error)
-      setSaveError(error instanceof Error ? error.message : 'Er ging iets mis bij het opslaan.')
+      if (error && typeof error === 'object' && 'message' in error) {
+        setSaveError(String((error as { message?: string }).message || 'Er ging iets mis bij het opslaan.'))
+      } else {
+        setSaveError('Er ging iets mis bij het opslaan.')
+      }
     } finally {
       setIsSaving(false)
     }
