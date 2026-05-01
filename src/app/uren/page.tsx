@@ -22,6 +22,19 @@ function toMinutes(value: string) {
 }
 
 function getValidation(start: string, end: string, breakMinutes: number) {
+  if (!start || !end) {
+    return {
+      isValid: false,
+      fieldErrors: {
+        startTime: start ? '' : 'Vul een begintijd in.',
+        endTime: end ? '' : 'Vul een eindtijd in.',
+        breakMinutes: '',
+      },
+      warning: '',
+      totalHours: 0,
+    }
+  }
+
   if (!isValidTime(start) || !isValidTime(end)) {
     return {
       isValid: false,
@@ -312,6 +325,7 @@ export default function UrenPage() {
                   <input
                     required
                     type="time"
+                    step="60"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
                     className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
@@ -323,6 +337,7 @@ export default function UrenPage() {
                   <input
                     required
                     type="time"
+                    step="60"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                     className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
