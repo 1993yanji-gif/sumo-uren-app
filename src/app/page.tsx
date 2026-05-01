@@ -44,7 +44,7 @@ export default function Home() {
 
   const filteredEmployees = useMemo(() => {
     const query = employeeSearch.trim().toLowerCase()
-    if (!query) return employees
+    if (!query) return []
     return employees.filter((employee) => employee.name.toLowerCase().includes(query))
   }, [employees, employeeSearch])
 
@@ -113,28 +113,36 @@ export default function Home() {
                 className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
               />
 
-              <div className="grid gap-3 md:grid-cols-2">
-                {filteredEmployees.map((employee) => {
-                  const isSelected = selectedEmployee === employee.id
-                  return (
-                    <button
-                      key={employee.id}
-                      type="button"
-                      onClick={() => setSelectedEmployee(employee.id)}
-                      className={`rounded-2xl border px-4 py-4 text-left transition ${isSelected ? 'border-[#8c6a2f] bg-[rgba(193,157,91,0.16)] shadow-[0_10px_24px_rgba(140,106,47,0.14)]' : 'border-[rgba(97,74,42,0.10)] bg-[rgba(255,252,247,0.86)] hover:border-[rgba(140,106,47,0.35)] hover:bg-[rgba(255,248,236,0.95)]'}`}
-                    >
-                      <p className="text-base font-semibold text-stone-900">{employee.name}</p>
-                      <p className="mt-1 text-sm text-stone-500">Tik om te selecteren</p>
-                    </button>
-                  )
-                })}
-              </div>
+              {employeeSearch.trim() ? (
+                <>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {filteredEmployees.map((employee) => {
+                      const isSelected = selectedEmployee === employee.id
+                      return (
+                        <button
+                          key={employee.id}
+                          type="button"
+                          onClick={() => setSelectedEmployee(employee.id)}
+                          className={`rounded-2xl border px-4 py-4 text-left transition ${isSelected ? 'border-[#8c6a2f] bg-[rgba(193,157,91,0.16)] shadow-[0_10px_24px_rgba(140,106,47,0.14)]' : 'border-[rgba(97,74,42,0.10)] bg-[rgba(255,252,247,0.86)] hover:border-[rgba(140,106,47,0.35)] hover:bg-[rgba(255,248,236,0.95)]'}`}
+                        >
+                          <p className="text-base font-semibold text-stone-900">{employee.name}</p>
+                          <p className="mt-1 text-sm text-stone-500">Tik om te selecteren</p>
+                        </button>
+                      )
+                    })}
+                  </div>
 
-              {!isLoadingEmployees && !filteredEmployees.length ? (
-                <div className="sumo-danger rounded-2xl px-4 py-3 text-sm">
-                  Geen medewerker gevonden.
+                  {!isLoadingEmployees && !filteredEmployees.length ? (
+                    <div className="sumo-danger rounded-2xl px-4 py-3 text-sm">
+                      Geen medewerker gevonden.
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-[rgba(97,74,42,0.14)] bg-[rgba(255,252,247,0.6)] px-4 py-4 text-sm text-stone-500">
+                  Typ een naam om een medewerker te zoeken.
                 </div>
-              ) : null}
+              )}
             </div>
 
             {selectedEmployee ? (
