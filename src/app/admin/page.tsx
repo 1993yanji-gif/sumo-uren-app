@@ -266,21 +266,39 @@ export default function AdminPage() {
   const saveEditedEntry = async () => {
     if (!editingEntryId) return
 
+    const breakMinutes = Number(editingEntryForm.breakMinutes)
+
+    if (!editingEntryForm.date) {
+      setMessage('Kies een datum.')
+      return
+    }
+
+    if (!/^\d{2}:\d{2}$/.test(editingEntryForm.startTime) || !/^\d{2}:\d{2}$/.test(editingEntryForm.endTime)) {
+      setMessage('Begin- en eindtijd moeten in HH:MM staan.')
+      return
+    }
+
+    if (Number.isNaN(breakMinutes) || breakMinutes < 0) {
+      setMessage('Pauze moet 0 of hoger zijn.')
+      return
+    }
+
     const confirmed = window.confirm('Weet je zeker dat je deze urenregel wilt bijwerken?')
     if (!confirmed) return
 
     setIsUpdatingEntry(true)
+    setMessage('')
     try {
       await updateTimeEntry({
         id: editingEntryId,
         date: editingEntryForm.date,
         startTime: editingEntryForm.startTime,
         endTime: editingEntryForm.endTime,
-        breakMinutes: Number(editingEntryForm.breakMinutes) || 0,
+        breakMinutes,
       })
+      await loadAdminData()
       setMessage('Urenregel bijgewerkt.')
       setEditingEntryId(null)
-      await loadAdminData()
     } catch (error) {
       console.error(error)
       setMessage(error instanceof Error ? error.message : 'Bijwerken mislukt.')

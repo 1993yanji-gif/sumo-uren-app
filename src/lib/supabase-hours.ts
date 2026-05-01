@@ -219,13 +219,43 @@ export async function updateTimeEntry(input: {
   endTime: string
   breakMinutes: number
 }) {
+  const timePattern = /^\d{2}:\d{2}$/
+
+  if (!input.date) {
+    throw new Error('Datum ontbreekt.')
+  }
+
+  if (!timePattern.test(input.startTime) || !timePattern.test(input.endTime)) {
+    throw new Error('Begin- en eindtijd moeten in HH:MM staan.')
+  }
+
+  if (input.breakMinutes < 0) {
+    throw new Error('Pauze kan niet negatief zijn.')
+  }
+
   const [startHour, startMinute] = input.startTime.split(':').map(Number)
   const [endHour, endMinute] = input.endTime.split(':').map(Number)
+
+  if ([startHour, startMinute, endHour, endMinute].some((value) => Number.isNaN(value))) {
+    throw new Error('Ongeldige tijd ingevuld.')
+  }
+
   const startTotal = startHour * 60 + startMinute
   const endTotal = endHour * 60 + endMinute
-  const totalHours = Math.max(endTotal - startTotal - input.breakMinutes, 0) / 60
 
-  const { error } = await supabase
+  if (endTotal <= startTotal) {
+    throw new Error('Eindtijd moet later zijn dan begintijd.')
+  }
+
+  const workedMinutes = endTotal - startTotal
+
+  if (input.breakMinutes >= workedMinutes) {
+    throw new Error('Pauze moet korter zijn dan de gewerkte tijd.')
+  }
+
+  const totalHours = (workedMinutes - input.breakMinutes) / 60
+
+  const { data, error } = await supabase
     .from('time_entries')
     .update({
       work_date: input.date,
@@ -235,8 +265,11 @@ export async function updateTimeEntry(input: {
       total_hours: totalHours,
     })
     .eq('id', input.id)
+    .select('id')
+    .single()
 
   if (error) throw error
+  if (!data) throw new Error('Urenregel niet gevonden.')
 
   return totalHours
 }
