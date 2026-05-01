@@ -15,7 +15,6 @@ export default function Home() {
   const [employeePin, setEmployeePin] = useState('')
   const [loginError, setLoginError] = useState('')
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true)
-  const [showPin, setShowPin] = useState(false)
 
   useEffect(() => {
     const loadEmployees = async () => {
@@ -112,24 +111,15 @@ export default function Home() {
               ))}
             </select>
 
-            <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
-              <input
-                type={showPin ? 'text' : 'password'}
-                inputMode="numeric"
-                maxLength={4}
-                value={employeePin}
-                onChange={(event) => setEmployeePin(event.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="Pincode"
-                className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPin((current) => !current)}
-                className="sumo-ghost-button rounded-2xl px-4 py-3 text-sm font-semibold transition"
-              >
-                {showPin ? 'Verberg pin' : 'Toon pin'}
-              </button>
-            </div>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={employeePin}
+              onChange={(event) => setEmployeePin(event.target.value.replace(/\D/g, '').slice(0, 4))}
+              placeholder="Pincode"
+              className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
+            />
 
             <div className="grid gap-3 md:grid-cols-3">
               <button
