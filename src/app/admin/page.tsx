@@ -95,9 +95,10 @@ export default function AdminPage() {
       ])
       setEmployees(employeesData)
       setEntries(entriesData)
+      setMessage('')
     } catch (error) {
       console.error(error)
-      setMessage('Kon admin gegevens niet laden.')
+      setMessage(error instanceof Error ? error.message : 'Kon admin gegevens niet laden.')
     } finally {
       setIsLoading(false)
     }
