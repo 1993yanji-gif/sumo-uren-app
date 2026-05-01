@@ -138,20 +138,15 @@ export default function Home() {
             </div>
 
             {selectedEmployee ? (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-stone-700">
-                  Gekozen medewerker: {employees.find((employee) => employee.id === selectedEmployee)?.name || 'Medewerker'}
-                </p>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  value={employeePin}
-                  onChange={(event) => setEmployeePin(event.target.value.replace(/\D/g, '').slice(0, 4))}
-                  placeholder="Pincode"
-                  className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
-                />
-              </div>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={employeePin}
+                onChange={(event) => setEmployeePin(event.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="Pincode"
+                className="sumo-input-light w-full rounded-2xl px-4 py-3 outline-none transition"
+              />
             ) : null}
 
             <div className="space-y-3">
