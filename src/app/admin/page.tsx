@@ -16,7 +16,6 @@ import {
 import { exportToCsv, exportToExcel, exportToPdf, mapEntriesForExport } from '@/lib/export-utils'
 
 const DEFAULT_ADMIN_PIN = '2580'
-const ADMIN_PIN_STORAGE_KEY = 'sumo-uren-admin-auth'
 
 type DateFilter = 'today' | 'week' | 'month' | 'all'
 type SortOption = 'recent' | 'hours'
@@ -121,14 +120,6 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const savedState = window.sessionStorage.getItem(ADMIN_PIN_STORAGE_KEY)
-    if (savedState === 'ok') {
-      setIsUnlocked(true)
-    }
-  }, [])
-
-  useEffect(() => {
     if (!isUnlocked) return
     loadAdminData()
   }, [isUnlocked])
@@ -176,7 +167,6 @@ export default function AdminPage() {
     if (pinInput === adminPin) {
       setIsUnlocked(true)
       setPinError('')
-      window.sessionStorage.setItem(ADMIN_PIN_STORAGE_KEY, 'ok')
       return
     }
 
