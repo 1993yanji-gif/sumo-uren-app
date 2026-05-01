@@ -425,30 +425,12 @@ export default function AdminPage() {
               placeholder="Zoek medewerker of ID"
               className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
             />
-            <div className="grid gap-2">
-              <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as DateFilter)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
-                <option value="today">Vandaag</option>
-                <option value="week">Deze week</option>
-                <option value="month">Deze maand</option>
-                <option value="all">Alles</option>
-              </select>
-              {dateFilter === 'month' ? (
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setSelectedMonth((current) => shiftMonth(current, -1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
-                    ←
-                  </button>
-                  <input
-                    type="month"
-                    value={selectedMonth}
-                    onChange={(event) => setSelectedMonth(event.target.value)}
-                    className="sumo-input rounded-2xl px-4 py-3 outline-none transition"
-                  />
-                  <button type="button" onClick={() => setSelectedMonth((current) => shiftMonth(current, 1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
-                    →
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as DateFilter)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
+              <option value="today">Vandaag</option>
+              <option value="week">Deze week</option>
+              <option value="month">Deze maand</option>
+              <option value="all">Alles</option>
+            </select>
             <select value={selectedEmployeeFilter} onChange={(event) => setSelectedEmployeeFilter(event.target.value)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
               <option value="all">Alle medewerkers</option>
               {employees.map((employee) => (
@@ -462,6 +444,23 @@ export default function AdminPage() {
               <option value="hours">Sortering: meeste uren</option>
             </select>
           </div>
+
+          {dateFilter === 'month' ? (
+            <div className="mt-3 flex items-center gap-2 md:max-w-md">
+              <button type="button" onClick={() => setSelectedMonth((current) => shiftMonth(current, -1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                ←
+              </button>
+              <input
+                type="month"
+                value={selectedMonth}
+                onChange={(event) => setSelectedMonth(event.target.value)}
+                className="sumo-input flex-1 rounded-2xl px-4 py-3 outline-none transition"
+              />
+              <button type="button" onClick={() => setSelectedMonth((current) => shiftMonth(current, 1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
+                →
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-8">
