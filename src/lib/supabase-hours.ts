@@ -10,7 +10,6 @@ export type TimeEntry = {
   endTime: string
   breakMinutes: number
   totalHours: number
-  note?: string
 }
 
 type EmployeeRow = {
@@ -30,7 +29,6 @@ type TimeEntryRow = {
   end_time: string
   break_minutes: number
   total_hours: number
-  note: string | null
   employees?:
     | {
         display_name: string
@@ -71,7 +69,6 @@ function mapEntry(entry: TimeEntryRow): TimeEntry {
     endTime: entry.end_time,
     breakMinutes: entry.break_minutes,
     totalHours: entry.total_hours,
-    note: entry.note || '',
   }
 }
 
@@ -179,7 +176,7 @@ export async function loginEmployee(employeeId: string, pin: string) {
 export async function getTimeEntries(): Promise<TimeEntry[]> {
   const { data, error } = await supabase
     .from('time_entries')
-    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours, note, employees(display_name)')
+    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours, employees(display_name)')
     .order('work_date', { ascending: false })
     .order('id', { ascending: false })
 
@@ -208,7 +205,6 @@ export async function createTimeEntry(input: {
     end_time: input.endTime,
     break_minutes: input.breakMinutes,
     total_hours: totalHours,
-    note: '',
   })
 
   if (error) throw error
@@ -230,7 +226,7 @@ export async function getEmployeeMonthlyEntries(employeeId: string, month: strin
 
   const { data, error } = await supabase
     .from('time_entries')
-    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours, note')
+    .select('id, employee_id, work_date, start_time, end_time, break_minutes, total_hours')
     .eq('employee_id', employeeId)
     .gte('work_date', monthStart)
     .lte('work_date', monthEnd)
@@ -250,7 +246,6 @@ export async function getEmployeeMonthlyEntries(employeeId: string, month: strin
     endTime: entry.end_time,
     breakMinutes: entry.break_minutes,
     totalHours: entry.total_hours,
-    note: entry.note || '',
   }))
 }
 
