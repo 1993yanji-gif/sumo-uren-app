@@ -29,13 +29,6 @@ function formatMonthLabel(monthKey: string) {
   }).format(new Date(year, month - 1, 1))
 }
 
-function normalizeTimeInput(value: string) {
-  const digitsOnly = value.replace(/\D/g, '').slice(0, 4)
-
-  if (digitsOnly.length <= 2) return digitsOnly
-  return `${digitsOnly.slice(0, 2)}:${digitsOnly.slice(2)}`
-}
-
 function isValidTime(value: string) {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value)
 }
@@ -249,6 +242,14 @@ export default function UrenPage() {
       return
     }
 
+    const isConfirmed = window.confirm(
+      `Klopt dit?\n\nDatum: ${formatWorkDate(date)}\nBegintijd: ${startTime}\nEindtijd: ${endTime}\nPauze: ${breakMinutes} min\nTotaal: ${validation.totalHours.toFixed(2)} uur`
+    )
+
+    if (!isConfirmed) {
+      return
+    }
+
     setIsSaving(true)
 
     try {
@@ -345,12 +346,9 @@ export default function UrenPage() {
                   <label className="mb-3 block text-sm font-semibold text-stone-800">Begintijd</label>
                   <input
                     required
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]{2}:[0-9]{2}"
+                    type="time"
                     value={startTime}
-                    onChange={(e) => setStartTime(normalizeTimeInput(e.target.value))}
-                    placeholder="08:30"
+                    onChange={(e) => setStartTime(e.target.value)}
                     className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"
                   />
                   {validation.fieldErrors.startTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.startTime}</p> : null}
@@ -359,12 +357,9 @@ export default function UrenPage() {
                   <label className="mb-3 block text-sm font-semibold text-stone-800">Eindtijd</label>
                   <input
                     required
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]{2}:[0-9]{2}"
+                    type="time"
                     value={endTime}
-                    onChange={(e) => setEndTime(normalizeTimeInput(e.target.value))}
-                    placeholder="17:00"
+                    onChange={(e) => setEndTime(e.target.value)}
                     className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"
                   />
                   {validation.fieldErrors.endTime ? <p className="mt-2 text-sm text-red-600">{validation.fieldErrors.endTime}</p> : null}
