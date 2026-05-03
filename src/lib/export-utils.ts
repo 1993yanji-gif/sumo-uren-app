@@ -43,6 +43,7 @@ function triggerDownload(blob: Blob, filename: string) {
 }
 
 export function exportToCsv(rows: ExportRow[], filename: string) {
+  const totalHours = rows.reduce((sum, row) => sum + row.totaalUren, 0)
   const headers = ['Medewerker', 'Datum', 'Begintijd', 'Eindtijd', 'Pauze (min)', 'Totaal uren']
   const csvRows = rows.map((row) => [
     row.medewerker,
@@ -53,7 +54,7 @@ export function exportToCsv(rows: ExportRow[], filename: string) {
     row.totaalUren.toFixed(2),
   ])
 
-  const csvContent = [headers, ...csvRows]
+  const csvContent = [headers, ...csvRows, ['', '', '', '', 'Maandtotaal', totalHours.toFixed(2)]]
     .map((line) => line.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(';'))
     .join('\n')
 
@@ -61,14 +62,25 @@ export function exportToCsv(rows: ExportRow[], filename: string) {
 }
 
 export function exportToExcel(rows: ExportRow[], filename: string) {
-  const worksheet = XLSX.utils.json_to_sheet(rows.map((row) => ({
-    Medewerker: row.medewerker,
-    Datum: row.datum,
-    Begintijd: row.begintijd,
-    Eindtijd: row.eindtijd,
-    'Pauze (min)': row.pauzeMinuten,
-    'Totaal uren': row.totaalUren,
-  })))
+  const totalHours = rows.reduce((sum, row) => sum + row.totaalUren, 0)
+  const worksheet = XLSX.utils.json_to_sheet([
+    ...rows.map((row) => ({
+      Medewerker: row.medewerker,
+      Datum: row.datum,
+      Begintijd: row.begintijd,
+      Eindtijd: row.eindtijd,
+      'Pauze (min)': row.pauzeMinuten,
+      'Totaal uren': row.totaalUren,
+    })),
+    {
+      Medewerker: '',
+      Datum: '',
+      Begintijd: '',
+      Eindtijd: '',
+      'Pauze (min)': 'Maandtotaal',
+      'Totaal uren': Number(totalHours.toFixed(2)),
+    },
+  ])
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Uren')
   XLSX.writeFile(workbook, filename)
