@@ -138,22 +138,6 @@ function formatWorkDate(value: string) {
   }).format(new Date(value))
 }
 
-function formatCalendarDayLabel(value: string) {
-  return new Intl.DateTimeFormat('nl-NL', {
-    weekday: 'short',
-    day: 'numeric',
-  }).format(new Date(value))
-}
-
-function getMonthDays(monthKey: string) {
-  const [year, month] = monthKey.split('-').map(Number)
-  const daysInMonth = new Date(year, month, 0).getDate()
-  return Array.from({ length: daysInMonth }, (_, index) => {
-    const day = String(index + 1).padStart(2, '0')
-    return `${monthKey}-${day}`
-  })
-}
-
 export default function UrenPage() {
   const [employees, setEmployees] = useState<EmployeeRecord[]>([])
   const [employeeId, setEmployeeId] = useState('')
@@ -168,8 +152,7 @@ export default function UrenPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [monthlyEntries, setMonthlyEntries] = useState<TimeEntry[]>([])
   const [isLoadingMonthlyEntries, setIsLoadingMonthlyEntries] = useState(false)
-  const [showMonthlyDetails, setShowMonthlyDetails] = useState(false)
-  const [selectedEntryDate, setSelectedEntryDate] = useState(today)
+  const [showMonthlyDetails, setShowMonthlyDetails] = useState(true)
 
   useEffect(() => {
     const loadEmployees = async () => {
@@ -222,18 +205,6 @@ export default function UrenPage() {
   const monthlyTotalHours = useMemo(() => {
     return monthlyEntries.reduce((sum, entry) => sum + entry.totalHours, 0)
   }, [monthlyEntries])
-
-  const monthDays = useMemo(() => getMonthDays(overviewMonth), [overviewMonth])
-
-  const entriesByDate = useMemo(() => {
-    return monthlyEntries.reduce<Record<string, TimeEntry[]>>((acc, entry) => {
-      if (!acc[entry.workDate]) acc[entry.workDate] = []
-      acc[entry.workDate].push(entry)
-      return acc
-    }, {})
-  }, [monthlyEntries])
-
-  const selectedDateEntries = useMemo(() => entriesByDate[selectedEntryDate] || [], [entriesByDate, selectedEntryDate])
 
   const selectedEmployeeName = useMemo(() => {
     return employees.find((employee) => employee.id === employeeId)?.name || 'Medewerker'
@@ -292,7 +263,6 @@ export default function UrenPage() {
       setSaveMessage('Uren zijn opgeslagen.')
       const refreshedEntries = await getEmployeeMonthlyEntries(employeeId, overviewMonth)
       setMonthlyEntries(refreshedEntries)
-      setSelectedEntryDate(date)
       setStartTime('')
       setEndTime('')
     } catch (error) {
@@ -435,13 +405,6 @@ export default function UrenPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowMonthlyDetails((current) => !current)}
-                  className="sumo-light-button rounded-2xl px-4 py-2 text-sm font-semibold transition"
-                >
-                  {showMonthlyDetails ? 'Sluit maandoverzicht' : 'Open maandoverzicht'}
-                </button>
                 <button type="button" onClick={() => setOverviewMonth((current) => shiftMonth(current, -1))} className="sumo-ghost-button rounded-2xl px-3 py-2 text-sm font-semibold transition">
                   Vorige
                 </button>
@@ -454,6 +417,9 @@ export default function UrenPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => setShowMonthlyDetails((current) => !current)} className="sumo-light-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
+                  {showMonthlyDetails ? 'Verberg details' : 'Toon details'}
+                </button>
                 <button type="button" onClick={() => handleEmployeeExport('excel')} className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition">
                   Excel
                 </button>
@@ -464,76 +430,30 @@ export default function UrenPage() {
             </div>
 
             {showMonthlyDetails ? (
-              <div className="mt-5 space-y-4">
+              <div className="mt-5 space-y-3">
                 {isLoadingMonthlyEntries ? (
                   <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Uren laden...</div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                      {monthDays.map((day) => {
-                        const dayEntries = entriesByDate[day] || []
-                        const totalDayHours = dayEntries.reduce((sum, entry) => sum + entry.totalHours, 0)
-                        const isFilled = dayEntries.length > 0
-                        const isSelected = selectedEntryDate === day
-
-                        return (
-                          <button
-                            key={day}
-                            type="button"
-                            onClick={() => {
-                              setSelectedEntryDate(day)
-                              setDate(day)
-                            }}
-                            className={`rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[#8c6a2f] bg-[#f3e7cf] shadow-[0_10px_24px_rgba(140,106,47,0.12)]' : isFilled ? 'border-[rgba(82,140,73,0.22)] bg-[rgba(223,245,218,0.85)]' : 'border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.88)]'}`}
-                          >
-                            <p className="text-sm font-semibold text-stone-900">{formatCalendarDayLabel(day)}</p>
-                            <p className={`mt-1 text-xs ${isFilled ? 'text-[#3f7a34]' : 'text-stone-500'}`}>
-                              {isFilled ? `${totalDayHours.toFixed(2)} uur` : 'Nog leeg'}
-                            </p>
-                          </button>
-                        )
-                      })}
-                    </div>
-
-                    <div className="rounded-2xl border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.88)] p-4">
-                      <div className="flex items-center justify-between gap-3">
+                ) : monthlyEntries.length ? (
+                  monthlyEntries.map((entry) => (
+                    <div key={entry.id} className="sumo-paper-card rounded-2xl px-4 py-4">
+                      <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs uppercase tracking-[0.18em] text-stone-500">Geselecteerde dag</p>
-                          <p className="mt-1 text-lg font-semibold text-stone-900">{formatWorkDate(selectedEntryDate)}</p>
+                          <p className="font-medium text-stone-900">{formatWorkDate(entry.workDate)}</p>
+                          <p className="mt-1 text-sm text-stone-500">
+                            {entry.startTime} - {entry.endTime} · Pauze {entry.breakMinutes} min
+                          </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setDate(selectedEntryDate)}
-                          className="sumo-ghost-button rounded-2xl px-4 py-2 text-sm font-semibold transition"
-                        >
-                          Gebruik deze dag
-                        </button>
-                      </div>
-
-                      <div className="mt-4 space-y-3">
-                        {selectedDateEntries.length ? (
-                          selectedDateEntries.map((entry) => (
-                            <div key={entry.id} className="sumo-paper-card rounded-2xl px-4 py-4">
-                              <div className="flex items-center justify-between gap-4">
-                                <div>
-                                  <p className="font-medium text-stone-900">{entry.startTime} - {entry.endTime}</p>
-                                  <p className="mt-1 text-sm text-stone-500">Pauze {entry.breakMinutes} min</p>
-                                </div>
-                                <p className="text-lg font-semibold text-[#8c6a2f]">{entry.totalHours.toFixed(2)} uur</p>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Nog geen uren geregistreerd op deze dag.</div>
-                        )}
+                        <p className="text-lg font-semibold text-[#8c6a2f]">{entry.totalHours.toFixed(2)} uur</p>
                       </div>
                     </div>
-                  </>
+                  ))
+                ) : (
+                  <div className="sumo-paper-card rounded-2xl px-4 py-4 text-sm text-stone-500">Nog geen uren deze maand.</div>
                 )}
               </div>
             ) : (
               <div className="mt-5 rounded-2xl border border-dashed border-[rgba(97,74,42,0.14)] bg-[rgba(255,252,247,0.6)] px-4 py-4 text-sm text-stone-500">
-                Open het maandoverzicht om de kalenderweergave te zien.
+                Toon details om per dag te zien welke uren zijn gewerkt.
               </div>
             )}
           </aside>
