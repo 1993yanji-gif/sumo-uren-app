@@ -152,7 +152,7 @@ export default function UrenPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [monthlyEntries, setMonthlyEntries] = useState<TimeEntry[]>([])
   const [isLoadingMonthlyEntries, setIsLoadingMonthlyEntries] = useState(false)
-  const [showMonthlyDetails, setShowMonthlyDetails] = useState(false)
+  const [showMonthlyDetails, setShowMonthlyDetails] = useState(true)
 
   useEffect(() => {
     const loadEmployees = async () => {
@@ -464,7 +464,7 @@ export default function UrenPage() {
               </div>
             ) : (
               <div className="mt-5 rounded-2xl border border-dashed border-[rgba(97,74,42,0.14)] bg-[rgba(255,252,247,0.6)] px-4 py-4 text-sm text-stone-500">
-                Detailregels zijn verborgen zodat je focus op registreren blijft.
+                Toon details om per dag te zien welke uren zijn gewerkt.
               </div>
             )}
           </aside>
