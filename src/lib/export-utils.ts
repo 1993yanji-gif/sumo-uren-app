@@ -76,11 +76,15 @@ export function exportToExcel(rows: ExportRow[], filename: string) {
 
 export function exportToPdf(rows: ExportRow[], filename: string, title: string) {
   const doc = new jsPDF()
+  const totalHours = rows.reduce((sum, row) => sum + row.totaalUren, 0)
+
   doc.setFontSize(16)
   doc.text(title, 14, 18)
+  doc.setFontSize(11)
+  doc.text(`Maandtotaal: ${totalHours.toFixed(2)} uur`, 14, 26)
 
   autoTable(doc, {
-    startY: 26,
+    startY: 32,
     head: [['Medewerker', 'Datum', 'Begintijd', 'Eindtijd', 'Pauze', 'Totaal uren']],
     body: rows.map((row) => [
       row.medewerker,
@@ -90,11 +94,17 @@ export function exportToPdf(rows: ExportRow[], filename: string, title: string) 
       String(row.pauzeMinuten),
       row.totaalUren.toFixed(2),
     ]),
+    foot: [['', '', '', '', 'Maandtotaal', `${totalHours.toFixed(2)} uur`]],
     styles: {
       fontSize: 9,
     },
     headStyles: {
       fillColor: [140, 106, 47],
+    },
+    footStyles: {
+      fillColor: [245, 238, 220],
+      textColor: [48, 33, 16],
+      fontStyle: 'bold',
     },
   })
 
