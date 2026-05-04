@@ -122,20 +122,6 @@ export default function AdminPage() {
     loadAdminData()
   }, [isUnlocked])
 
-  const filteredEntries = useMemo(() => {
-    return entries
-      .filter((entry) => {
-        if (dateFilter === 'month') return isInSpecificMonth(entry.workDate, selectedMonth)
-        return isInDateFilter(entry.workDate, dateFilter)
-      })
-      .filter((entry) => selectedEmployeeFilter === 'all' || entry.employeeId === selectedEmployeeFilter)
-      .sort((a, b) => `${b.workDate}-${b.id}`.localeCompare(`${a.workDate}-${a.id}`))
-  }, [entries, dateFilter, selectedEmployeeFilter, selectedMonth])
-
-  const totalHours = useMemo(() => filteredEntries.reduce((sum, row) => sum + row.totalHours, 0), [filteredEntries])
-  const uniqueEmployeesWithEntries = useMemo(() => new Set(filteredEntries.map((entry) => entry.employeeName)).size, [filteredEntries])
-  const latestEntries = useMemo(() => filteredEntries.slice(0, 12), [filteredEntries])
-
   const filteredEmployees = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
@@ -151,6 +137,23 @@ export default function AdminPage() {
         return employee.name.toLowerCase().includes(query) || fullName.includes(query) || employee.id.toLowerCase().includes(query)
       })
   }, [employees, searchQuery, statusFilter])
+
+  const filteredEmployeeIds = useMemo(() => new Set(filteredEmployees.map((employee) => employee.id)), [filteredEmployees])
+
+  const filteredEntries = useMemo(() => {
+    return entries
+      .filter((entry) => {
+        if (dateFilter === 'month') return isInSpecificMonth(entry.workDate, selectedMonth)
+        return isInDateFilter(entry.workDate, dateFilter)
+      })
+      .filter((entry) => selectedEmployeeFilter === 'all' || entry.employeeId === selectedEmployeeFilter)
+      .filter((entry) => !searchQuery.trim() || (entry.employeeId ? filteredEmployeeIds.has(entry.employeeId) : false))
+      .sort((a, b) => `${b.workDate}-${b.id}`.localeCompare(`${a.workDate}-${a.id}`))
+  }, [entries, dateFilter, selectedEmployeeFilter, selectedMonth, searchQuery, filteredEmployeeIds])
+
+  const totalHours = useMemo(() => filteredEntries.reduce((sum, row) => sum + row.totalHours, 0), [filteredEntries])
+  const uniqueEmployeesWithEntries = useMemo(() => new Set(filteredEntries.map((entry) => entry.employeeName)).size, [filteredEntries])
+  const latestEntries = useMemo(() => filteredEntries.slice(0, 12), [filteredEntries])
 
   const employeeSummaries = useMemo<EmployeeSummary[]>(() => {
     const scopedEntries = entries.filter((entry) => isInSpecificMonth(entry.workDate, selectedMonth))
