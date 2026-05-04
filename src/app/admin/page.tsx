@@ -18,7 +18,6 @@ import { exportToCsv, exportToExcel, exportToPdf, mapEntriesForExport } from '@/
 const DEFAULT_ADMIN_PIN = '2580'
 
 type DateFilter = 'today' | 'week' | 'month' | 'all'
-type SortOption = 'recent' | 'hours'
 
 const currentMonthKey = new Date().toISOString().slice(0, 7)
 
@@ -93,7 +92,6 @@ export default function AdminPage() {
   const [dateFilter, setDateFilter] = useState<DateFilter>('month')
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey)
   const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState('all')
-  const [sortOption, setSortOption] = useState<SortOption>('recent')
   const [openEmployeeCards, setOpenEmployeeCards] = useState<Record<string, boolean>>({})
   const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active')
   const [editingEntryId, setEditingEntryId] = useState<number | null>(null)
@@ -131,11 +129,8 @@ export default function AdminPage() {
         return isInDateFilter(entry.workDate, dateFilter)
       })
       .filter((entry) => selectedEmployeeFilter === 'all' || entry.employeeId === selectedEmployeeFilter)
-      .sort((a, b) => {
-        if (sortOption === 'hours') return b.totalHours - a.totalHours
-        return `${b.workDate}-${b.id}`.localeCompare(`${a.workDate}-${a.id}`)
-      })
-  }, [entries, dateFilter, selectedEmployeeFilter, sortOption, selectedMonth])
+      .sort((a, b) => `${b.workDate}-${b.id}`.localeCompare(`${a.workDate}-${a.id}`))
+  }, [entries, dateFilter, selectedEmployeeFilter, selectedMonth])
 
   const totalHours = useMemo(() => filteredEntries.reduce((sum, row) => sum + row.totalHours, 0), [filteredEntries])
   const uniqueEmployeesWithEntries = useMemo(() => new Set(filteredEntries.map((entry) => entry.employeeName)).size, [filteredEntries])
@@ -152,7 +147,8 @@ export default function AdminPage() {
       })
       .filter((employee) => {
         if (!query) return true
-        return employee.name.toLowerCase().includes(query) || employee.id.toLowerCase().includes(query)
+        const fullName = `${employee.firstName || ''} ${employee.lastName || ''}`.trim().toLowerCase()
+        return employee.name.toLowerCase().includes(query) || fullName.includes(query) || employee.id.toLowerCase().includes(query)
       })
   }, [employees, searchQuery, statusFilter])
 
@@ -424,13 +420,13 @@ export default function AdminPage() {
 
         {message ? <div className="sumo-success mt-6 rounded-2xl px-4 py-3 text-sm">{message}</div> : null}
 
-        <div className="sticky top-3 z-10 mt-6 rounded-[1.5rem] border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.96)] p-4 shadow-[0_8px_24px_rgba(86,63,34,0.08)] backdrop-blur">
-          <div className="grid gap-3 md:grid-cols-4">
+        <div className="mt-6 rounded-[1.5rem] border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.96)] p-4 shadow-[0_8px_24px_rgba(86,63,34,0.08)] backdrop-blur">
+          <div className="grid gap-3 md:grid-cols-3">
             <input
               type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Zoek medewerker of ID"
+              placeholder="Zoek medewerker"
               className="sumo-input w-full rounded-2xl px-4 py-3 outline-none transition"
             />
             <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as DateFilter)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
@@ -446,10 +442,6 @@ export default function AdminPage() {
                   {employee.name}
                 </option>
               ))}
-            </select>
-            <select value={sortOption} onChange={(event) => setSortOption(event.target.value as SortOption)} className="sumo-input rounded-2xl px-4 py-3 outline-none transition">
-              <option value="recent">Sortering: recent</option>
-              <option value="hours">Sortering: meeste uren</option>
             </select>
           </div>
 
