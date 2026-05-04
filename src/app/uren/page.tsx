@@ -347,6 +347,7 @@ export default function UrenPage() {
                   <input
                     required
                     type="time"
+                    step={300}
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
                     className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"
@@ -358,6 +359,7 @@ export default function UrenPage() {
                   <input
                     required
                     type="time"
+                    step={300}
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                     className="sumo-input w-full rounded-2xl px-4 py-4 text-lg outline-none transition"

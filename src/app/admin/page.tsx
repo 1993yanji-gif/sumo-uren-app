@@ -515,11 +515,11 @@ export default function AdminPage() {
                             </label>
                             <label className="grid gap-2 text-sm text-stone-600">
                               <span className="font-medium text-stone-900">Begintijd</span>
-                              <input type="time" value={editingEntryForm.startTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, startTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                              <input type="time" step={300} value={editingEntryForm.startTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, startTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
                             </label>
                             <label className="grid gap-2 text-sm text-stone-600">
                               <span className="font-medium text-stone-900">Eindtijd</span>
-                              <input type="time" value={editingEntryForm.endTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, endTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
+                              <input type="time" step={300} value={editingEntryForm.endTime} onChange={(event) => setEditingEntryForm((current) => ({ ...current, endTime: event.target.value }))} className="sumo-input rounded-2xl px-4 py-3 outline-none transition" />
                             </label>
                             <label className="grid gap-2 text-sm text-stone-600">
                               <span className="font-medium text-stone-900">Pauze (min)</span>
