@@ -38,7 +38,7 @@ function toMinutes(value: string) {
   return hour * 60 + minute
 }
 
-function getValidation(start: string, end: string, breakMinutes: number) {
+function getValidation(start: string, end: string, breakMinutes: number, date: string, monthlyEntries: TimeEntry[]) {
   if (!start || !end) {
     return {
       isValid: false,
@@ -47,7 +47,7 @@ function getValidation(start: string, end: string, breakMinutes: number) {
         endTime: end ? '' : 'Vul een eindtijd in.',
         breakMinutes: '',
       },
-      warning: '',
+      warnings: [] as string[],
       totalHours: 0,
     }
   }
@@ -60,7 +60,7 @@ function getValidation(start: string, end: string, breakMinutes: number) {
         endTime: !isValidTime(end) ? 'Vul een geldige eindtijd in.' : '',
         breakMinutes: '',
       },
-      warning: '',
+      warnings: [] as string[],
       totalHours: 0,
     }
   }
@@ -77,7 +77,7 @@ function getValidation(start: string, end: string, breakMinutes: number) {
         endTime: 'Eindtijd moet later zijn dan begintijd.',
         breakMinutes: '',
       },
-      warning: '',
+      warnings: [] as string[],
       totalHours: 0,
     }
   }
@@ -90,7 +90,7 @@ function getValidation(start: string, end: string, breakMinutes: number) {
         endTime: '',
         breakMinutes: 'Pauze mag niet negatief zijn.',
       },
-      warning: '',
+      warnings: [] as string[],
       totalHours: 0,
     }
   }
@@ -103,13 +103,32 @@ function getValidation(start: string, end: string, breakMinutes: number) {
         endTime: '',
         breakMinutes: 'Pauze mag niet groter zijn dan de dienstduur.',
       },
-      warning: '',
+      warnings: [] as string[],
       totalHours: 0,
     }
   }
 
   const totalHours = (shiftMinutes - breakMinutes) / 60
-  const warning = totalHours > 12 ? 'Let op: dit is een extreem lange shift.' : totalHours > 10 ? 'Let op: controleer of deze lange shift klopt.' : ''
+  const warnings: string[] = []
+
+  if (totalHours > 12) {
+    warnings.push('Let op: dit is een extreem lange shift.')
+  } else if (totalHours > 10) {
+    warnings.push('Let op: controleer of deze lange shift klopt.')
+  }
+
+  if (totalHours < 2) {
+    warnings.push('Let op: dit is een erg korte shift. Controleer of de tijden kloppen.')
+  }
+
+  if (breakMinutes === 0 && totalHours >= 6) {
+    warnings.push('Let op: je hebt geen pauze ingevuld bij een langere dienst.')
+  }
+
+  const hasEntryOnSameDate = monthlyEntries.some((entry) => entry.workDate === date)
+  if (hasEntryOnSameDate) {
+    warnings.push('Voor deze datum staat al een registratie. Controleer of dit geen dubbele invoer is.')
+  }
 
   return {
     isValid: true,
@@ -118,7 +137,7 @@ function getValidation(start: string, end: string, breakMinutes: number) {
       endTime: '',
       breakMinutes: '',
     },
-    warning,
+    warnings,
     totalHours,
   }
 }
@@ -192,8 +211,8 @@ export default function UrenPage() {
   }, [employeeId, overviewMonth])
 
   const validation = useMemo(() => {
-    return getValidation(startTime, endTime, Number(breakMinutes) || 0)
-  }, [startTime, endTime, breakMinutes])
+    return getValidation(startTime, endTime, Number(breakMinutes) || 0, date, monthlyEntries)
+  }, [startTime, endTime, breakMinutes, date, monthlyEntries])
 
   const monthlyTotalHours = useMemo(() => {
     return monthlyEntries.reduce((sum, entry) => sum + entry.totalHours, 0)
@@ -372,7 +391,13 @@ export default function UrenPage() {
                 <p className="sumo-soft-panel-title text-sm uppercase tracking-[0.25em]">Totaal gewerkte uren</p>
                 <p className="mt-2 text-4xl font-semibold text-stone-900">{validation.totalHours.toFixed(2)} uur</p>
                 <p className="sumo-soft-panel-text mt-2 text-sm">Begintijd - eindtijd - pauze = totaal aantal uren</p>
-                {validation.warning ? <p className="mt-3 text-sm font-medium text-amber-700">{validation.warning}</p> : null}
+                {validation.warnings.length ? (
+                  <div className="mt-3 space-y-2">
+                    {validation.warnings.map((warning) => (
+                      <p key={warning} className="text-sm font-medium text-amber-700">{warning}</p>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <button
