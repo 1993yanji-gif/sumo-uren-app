@@ -192,24 +192,21 @@ export async function createTimeEntry(input: {
   endTime: string
   breakMinutes: number
 }) {
-  const [startHour, startMinute] = input.startTime.split(':').map(Number)
-  const [endHour, endMinute] = input.endTime.split(':').map(Number)
-  const startTotal = startHour * 60 + startMinute
-  const endTotal = endHour * 60 + endMinute
-  const totalHours = Math.max(endTotal - startTotal - input.breakMinutes, 0) / 60
-
-  const { error } = await supabase.from('time_entries').insert({
-    employee_id: input.employeeId,
-    work_date: input.date,
-    start_time: input.startTime,
-    end_time: input.endTime,
-    break_minutes: input.breakMinutes,
-    total_hours: totalHours,
-  })
+  const { data, error } = await supabase
+    .from('time_entries')
+    .insert({
+      employee_id: input.employeeId,
+      work_date: input.date,
+      start_time: input.startTime,
+      end_time: input.endTime,
+      break_minutes: input.breakMinutes,
+    })
+    .select('total_hours')
+    .single()
 
   if (error) throw error
 
-  return totalHours
+  return data.total_hours
 }
 
 export async function updateTimeEntry(input: {
@@ -240,21 +237,6 @@ export async function updateTimeEntry(input: {
     throw new Error('Ongeldige tijd ingevuld.')
   }
 
-  const startTotal = startHour * 60 + startMinute
-  const endTotal = endHour * 60 + endMinute
-
-  if (endTotal <= startTotal) {
-    throw new Error('Eindtijd moet later zijn dan begintijd.')
-  }
-
-  const workedMinutes = endTotal - startTotal
-
-  if (input.breakMinutes >= workedMinutes) {
-    throw new Error('Pauze moet korter zijn dan de gewerkte tijd.')
-  }
-
-  const totalHours = (workedMinutes - input.breakMinutes) / 60
-
   const { data, error } = await supabase
     .from('time_entries')
     .update({
@@ -262,16 +244,15 @@ export async function updateTimeEntry(input: {
       start_time: input.startTime,
       end_time: input.endTime,
       break_minutes: input.breakMinutes,
-      total_hours: totalHours,
     })
     .eq('id', input.id)
-    .select('id')
+    .select('id, total_hours')
     .single()
 
   if (error) throw error
   if (!data) throw new Error('Urenregel niet gevonden.')
 
-  return totalHours
+  return data.total_hours
 }
 
 export async function deleteTimeEntry(id: number) {
@@ -280,8 +261,10 @@ export async function deleteTimeEntry(id: number) {
 }
 
 export async function getEmployeeMonthlyEntries(employeeId: string, month: string): Promise<TimeEntry[]> {
+  const [year, monthNumber] = month.split('-').map(Number)
   const monthStart = `${month}-01`
-  const monthEnd = `${month}-31`
+  const lastDay = new Date(year, monthNumber, 0).getDate()
+  const monthEnd = `${month}-${String(lastDay).padStart(2, '0')}`
 
   const employee = await supabase
     .from('employees')
