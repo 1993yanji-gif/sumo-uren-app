@@ -192,6 +192,12 @@ export async function createTimeEntry(input: {
   endTime: string
   breakMinutes: number
 }) {
+  const [startHour, startMinute] = input.startTime.split(':').map(Number)
+  const [endHour, endMinute] = input.endTime.split(':').map(Number)
+  const startTotal = startHour * 60 + startMinute
+  const endTotal = endHour * 60 + endMinute
+  const fallbackTotalHours = Math.max(endTotal - startTotal - input.breakMinutes, 0) / 60
+
   const { data, error } = await supabase
     .from('time_entries')
     .insert({
@@ -200,13 +206,15 @@ export async function createTimeEntry(input: {
       start_time: input.startTime,
       end_time: input.endTime,
       break_minutes: input.breakMinutes,
+      total_hours: Number(fallbackTotalHours.toFixed(2)),
     })
-    .select('total_hours')
+    .select('id, total_hours')
     .single()
 
   if (error) throw error
+  if (!data) throw new Error('Opslaan gelukt niet: geen data terug van time entry.')
 
-  return data.total_hours
+  return data.total_hours ?? Number(fallbackTotalHours.toFixed(2))
 }
 
 export async function updateTimeEntry(input: {
