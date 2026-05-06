@@ -532,34 +532,24 @@ export default function AdminPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                            <div className="min-w-0">
-                              <p className="text-lg font-semibold text-stone-900">{row.employeeName}</p>
-                              <p className="mt-1 text-sm text-stone-500">{row.workDate}</p>
+                        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                              <p className="text-base font-semibold text-stone-900">{row.employeeName}</p>
+                              <span className="text-sm text-stone-500">{row.workDate}</span>
                             </div>
-                            <div className="rounded-2xl bg-[rgba(193,157,91,0.12)] px-4 py-3 text-left md:text-right">
-                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8c6a2f]">Totaal</p>
-                              <p className="mt-1 text-2xl font-semibold text-[#8c6a2f]">{row.totalHours.toFixed(2)} uur</p>
-                            </div>
-                          </div>
-
-                          <div className="grid gap-3 md:grid-cols-3">
-                            <div className="rounded-2xl border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.85)] px-4 py-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">Dienst</p>
-                              <p className="mt-1 text-sm font-medium text-stone-900">{row.startTime} - {row.endTime}</p>
-                            </div>
-                            <div className="rounded-2xl border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.85)] px-4 py-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">Pauze</p>
-                              <p className="mt-1 text-sm font-medium text-stone-900">{row.breakMinutes} min</p>
-                            </div>
-                            <div className="rounded-2xl border border-[rgba(97,74,42,0.08)] bg-[rgba(255,252,247,0.85)] px-4 py-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">Regel ID</p>
-                              <p className="mt-1 text-sm font-medium text-stone-900">#{row.id}</p>
+                            <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium text-stone-600">
+                              <span className="rounded-full bg-[rgba(255,252,247,0.92)] px-3 py-1">{row.startTime} - {row.endTime}</span>
+                              <span className="rounded-full bg-[rgba(255,252,247,0.92)] px-3 py-1">Pauze {row.breakMinutes} min</span>
+                              <span className="rounded-full bg-[rgba(255,252,247,0.92)] px-3 py-1">#{row.id}</span>
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-2 md:justify-end">
+                          <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                            <div className="rounded-2xl bg-[rgba(193,157,91,0.12)] px-4 py-2 text-left xl:text-right">
+                              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[#8c6a2f]">Totaal</p>
+                              <p className="text-lg font-semibold text-[#8c6a2f]">{row.totalHours.toFixed(2)} uur</p>
+                            </div>
                             <button type="button" onClick={() => startEditingEntry(row)} className="sumo-ghost-button rounded-2xl px-4 py-2 text-xs font-semibold transition">
                               Bewerken
                             </button>
