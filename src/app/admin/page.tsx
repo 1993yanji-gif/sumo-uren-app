@@ -550,12 +550,6 @@ export default function AdminPage() {
                               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[#8c6a2f]">Totaal</p>
                               <p className="text-lg font-semibold text-[#8c6a2f]">{row.totalHours.toFixed(2)} uur</p>
                             </div>
-                            <button type="button" onClick={() => startEditingEntry(row)} className="sumo-ghost-button rounded-2xl px-4 py-2 text-xs font-semibold transition">
-                              Bewerken
-                            </button>
-                            <button type="button" onClick={() => removeEntry(row.id)} className="sumo-light-button rounded-2xl px-4 py-2 text-xs font-semibold transition">
-                              Verwijderen
-                            </button>
                           </div>
                         </div>
                       )}
