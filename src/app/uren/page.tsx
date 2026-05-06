@@ -340,8 +340,8 @@ export default function UrenPage() {
 
                   <div className="flex-1">
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Pauze</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[0, 30].map((minutes) => {
+                    <div className="grid grid-cols-3 gap-2">
+                      {[0, 15, 30].map((minutes) => {
                         const isSelected = breakMinutes === String(minutes)
                         return (
                           <button
